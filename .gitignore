@@ -1,0 +1,30 @@
+# ==========================================
+# Compilación de Cabal / GHC
+# ==========================================
+dist-newstyle/
+dist/
+*.o
+*.hi
+*.chi
+*.chs.h
+
+# Archivos de perfilado y logs
+*.prof
+*.hp
+*.eventlog
+
+# ==========================================
+# Haskell Language Server (HLS)
+# ==========================================
+.hie/
+cabal.project.local
+cabal.project.local~
+
+# ==========================================
+# Editor (Neovim / Vim)
+# ==========================================
+*.swp
+*.swo
+*~
+Session.vim
+tags
