@@ -6,6 +6,7 @@ import System.IO (hPutStrLn, stderr)
 import Alex (getToken)
 import Token (Token(..))
 
+
 -- Pasamos de un fichero a un string con el contenido del fichero
 -- Esta función es lazy, luego convierte el fichero según sea necesario
 main :: IO ()

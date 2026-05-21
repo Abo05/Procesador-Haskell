@@ -1,22 +1,48 @@
-module gerrores where
+module GErrores where
 
 -- TODO: Esto sería una mónada, pero investigar más
-data GError = Gerror
-    { linea :: int
+data GError = GError
+    { linea :: Int
     , errores :: [Error]
     } deriving (Show)
 
 data Error = Error
-    { errlinea :: int
-    , errcodigo :: int
-    , errmensaje :: string
-    } deriving (eq)
+    { errLinea :: Int
+    , errCodigo :: Int
+    , errMensaje :: String
+    } deriving (Eq)
 
 --TODO: cambiar a Text
 --al hacer el "struct", se crean los getters automaticamente
-instance show error where
-    show e = "error en la línea " ++ show(errlinea e)
-    ++ ": " ++ errmensaje e
+instance Show Error where
+    show e = "error en la línea " ++ show(errLinea e) ++ ": " ++ errMensaje e
+
+gErrorInicial :: GError
+gErrorInicial = GError
+    { linea     = 1
+    , errores = []
+    }
+
+nuevaLinea :: GError -> GError
+nuevaLinea ge = ge
+    { linea     = linea ge + 1
+    }
+
+registrarError :: Int -> GError -> GError
+registrarError cod ge =
+        let err = Error
+                { errLinea    = linea ge
+                , errCodigo   = cod
+                , errMensaje  = mensajeError cod
+                }
+        in ge { errores = err : errores ge }
+
+hayErrores :: GError -> Bool
+hayErrores ge = not (null(errores ge))
+
+-- Los errores se acumularon en orden inverso
+listarErrores :: GError -> [Error]
+listarErrores = reverse . errores
 
 mensajeError :: Int -> String
 mensajeError 0  = "carácter \\ o '.' no esperado en estado inicial"
