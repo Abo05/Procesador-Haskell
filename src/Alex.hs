@@ -1,52 +1,19 @@
 module Alex where
 
-import Data.Char (isSpace, isDigit, isAlpha)
+import Data.Char    (isSpace, isDigit, isAlpha)
+import Token        (Token(..), lexemaAToken) 
+import Error        (Error(..), mensajeError) 
 
--- Tipo algebraico que nos sirve para codificar los tipos de los tokens, haciendo que no se pase nada extraño
-data Code 
-    = TkEntero 
-    | TkReal
-    | TkCadena
-    | TkTrue
-    | TkFalse
-    | TkParentesisA
-    | TkParentesisC
-    | TkSuma
-    | TkResta
-    | TkMayor
-    | TkMayorIgual
-    | TkNot
-    | TkAnd
-    | TkAutodecremento
-    | TkAsignacion
-    | TkIdentificacion
-    | TkLet
-    | TkInt
-    | TkString
-    | TkBoolean
-    | TkFloat
-    | TkVoid
-    | TkPuntoComa
-    | TkLlaveA
-    | TkLlaveC
-    | TkIf
-    | TkElse
-    | TkComa
-    | TkFunction
-    | TkRead
-    | TkWrite
-    | TkEof
+-- Constantes
+maxEntero :: Int
+maxEntero = 32767
 
--- Tipo algebraico para el lexema del token. Añadimos el lexema Nil para indicar que no tiene lexema ese token
-data Lex 
-    = Value
-    | Pos
-    | Lex
-    | Nil
+maxReal :: Float
+maxReal = 1.0e38
 
--- Definimos el tipo token como un codigo y un lexema
-type Token = (Code, Lex)
+maxCadena = 64
 
+-- TODO: Terminar la función y ver como relacionarla a lo demás
 getTokens :: String -> [Maybe Token]
 getTokens fich = getTokensAux fich 0
     where
