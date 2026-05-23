@@ -1,0 +1,2 @@
+let int x = !1; //Hola, let int hola
+if(bool+x){} else 

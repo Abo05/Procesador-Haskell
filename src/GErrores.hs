@@ -1,6 +1,6 @@
 module GErrores where
 
--- TODO: Esto sería una mónada, pero investigar más
+-- TODO: Esto investigarlo, pero investigar más
 data GError = GError
     { linea :: Int
     , errores :: [Error]
@@ -12,7 +12,7 @@ data Error = Error
     , errMensaje :: String
     } deriving (Eq)
 
---TODO: cambiar a Text
+--TODO: ver si es menjor cambiar a Text
 --al hacer el "struct", se crean los getters automaticamente
 instance Show Error where
     show e = "error en la línea " ++ show(errLinea e) ++ ": " ++ errMensaje e
@@ -20,14 +20,16 @@ instance Show Error where
 gErrorInicial :: GError
 gErrorInicial = GError
     { linea     = 1
-    , errores = []
+    , errores   = []
     }
 
+-- Esto copía la variable, pero cambia la línea
 nuevaLinea :: GError -> GError
 nuevaLinea ge = ge
     { linea     = linea ge + 1
     }
 
+-- Cada vez crea una nueva variable de GErrores
 registrarError :: Int -> GError -> GError
 registrarError cod ge =
         let err = Error
@@ -44,6 +46,7 @@ hayErrores ge = not (null(errores ge))
 listarErrores :: GError -> [Error]
 listarErrores = reverse . errores
 
+-- El número tiene que ver con el estado en el que me encuentro
 mensajeError :: Int -> String
 mensajeError 0  = "carácter \\ o '.' no esperado en estado inicial"
 mensajeError 2  = "número real con parte decimal faltante"
