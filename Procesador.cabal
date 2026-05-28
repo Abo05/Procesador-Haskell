@@ -68,7 +68,7 @@ library
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.18
+    build-depends:    base >= 4.18 && < 4.21
 
     -- Directories containing source files.
     hs-source-dirs:   src
@@ -91,7 +91,7 @@ executable Procesador
 
     -- Other library packages from which modules are imported.
     build-depends:
-        base ^>=4.18,
+        base >= 4.18 && < 4.21,
         Procesador
 
     -- Directories containing source files.
@@ -124,5 +124,5 @@ test-suite Procesador-test
 
     -- Test dependencies.
     build-depends:
-        base ^>=4.18,
+        base >= 4.18 && < 4.21,
         Procesador
