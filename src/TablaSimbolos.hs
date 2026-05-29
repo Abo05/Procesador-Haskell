@@ -3,7 +3,7 @@ module TablaSimbolos where
 newtype TablaSimbolos = TS [String] deriving Show
 
 tablaInicial :: TablaSimbolos
-tablaInicial = TS[]
+tablaInicial = TS []
 
 -- Devuelve (posición, tabla actualizada, true si insertado)
 -- Si el lexema ya existe devuelve su posición sin modificar la tabla

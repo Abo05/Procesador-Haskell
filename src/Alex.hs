@@ -1,9 +1,10 @@
 module Alex where
---TODO: Tengo que poner qué exporto, por pereza ahora exporta todo
 
-import Data.Char --   (isSpace, isDigit, isAlpha)
-import Token     --   (Token(..), identificadorACode) 
-import GErrores  --      (Error(..), mensajeError) 
+--Exportamos solo lo que se utiliza
+import Data.Char (isSpace, isDigit, isAlpha, digitToInt, isAlphaNum) 
+
+import Token    (Token(..), identificadorACode) 
+import GErrores  (GError, nuevaLinea, registrarError, CodErr (..)) 
 import TablaSimbolos
 
 -- Constantes
@@ -19,12 +20,23 @@ maxCadena = 64
 -- Tiene las estructuras necesarias y el token devuelto.
 -- Además, True si se ha insertado un léxema en la tabla de símbolos
 -- No nos vale con token, pues tenemos que ver si el identificador es nuevo o no
-type Resultado = (Maybe Token, String, GError, TablaSimbolos, Bool)
+type TsMod = Bool
+type Resultado = (Maybe Token, String, GError, TablaSimbolos, TsMod)
 
 getToken :: String -> GError -> TablaSimbolos -> Resultado
 getToken fich ge ts = estadoIn fich ge ts
 
+-- Mueve el fichero hasta el siguiente caracter no alfabetico (Es una mickey herramienta que usaremos más adelante)
+getNextNoAlfa :: String -> String
+getNextNoAlfa [] = []
+getNextNoAlfa fich@(c:cs) 
+                | isAlpha c = getNextNoAlfa cs
+                | otherwise = fich
+
 ------------------------
+-- Todos los estados devuelven False en TsMod salvo estadoIdent (estado identificador)
+-- (los demás no tocan la tabla de símbolos)
+
 
 --Devuelvo el Token, gestor de errores, tabla de sismbolos y el string que queda después de haber leído el token
 estadoIn :: String -> GError -> TablaSimbolos -> Resultado
@@ -33,52 +45,55 @@ estadoIn [] ge ts = (Just TkEof, [], ge, ts, False)
 estadoIn (c:cs) ge ts
                 | c == '\n'             = estadoIn cs (nuevaLinea ge) ts
                 | isSpace c             = estadoIn cs ge ts
-                | isDigit c             = estadoNum cs ge ts [c] (digitToInt c)
-                | isAlpha c || c == '_' = estadoVar cs ge ts [c]
+                | isDigit c             = estadoNum cs ge ts (digitToInt c)
+                | isAlpha c || c == '_' = estadoIdent cs ge ts [c]
                 | c == '"'              = estadoCad cs ge ts "" 0
                 | c == '-'              = estadoMenos cs ge ts
                 | c == '>'              = estadoMayor cs ge ts
                 | c == '&'              = estadoAnd cs ge ts
-                | c == '/'              = estadoDiv cs ge ts
-                | c == '('  = (Just TkParentesisA,  cs, ge, ts, False)
-                | c == ')'  = (Just TkParentesisC,  cs, ge, ts, False)
-                | c == '+'  = (Just TkSuma,         cs, ge, ts, False)
-                | c == ';'  = (Just TkPuntoComa,    cs, ge, ts, False)
-                | c == '{'  = (Just TkLlaveA,       cs, ge, ts, False)
-                | c == '}'  = (Just TkLlaveC,       cs, ge, ts, False)
-                | c == ','  = (Just TkComa,         cs, ge, ts, False)
-                | c == '!'  = (Just TkNot,          cs, ge, ts, False)
-                | c == '='  = (Just TkAsignacion,   cs, ge, ts, False)
-                | otherwise =
-                    let ge' = registrarError 11 ge
+                | c == '/'              = estadoInCom cs ge ts
+                | c == '('              = (Just TkParentesisA,  cs, ge, ts, False)
+                | c == ')'              = (Just TkParentesisC,  cs, ge, ts, False)
+                | c == '+'              = (Just TkSuma,         cs, ge, ts, False)
+                | c == ';'              = (Just TkPuntoComa,    cs, ge, ts, False)
+                | c == '{'              = (Just TkLlaveA,       cs, ge, ts, False)
+                | c == '}'              = (Just TkLlaveC,       cs, ge, ts, False)
+                | c == ','              = (Just TkComa,         cs, ge, ts, False)
+                | c == '!'              = (Just TkNot,          cs, ge, ts, False)
+                | c == '='              = (Just TkAsignacion,   cs, ge, ts, False)
+                | otherwise             =
+                    let ge'             = registrarError ErrCarNoEsp ge
                     in (Nothing, cs, ge', ts, False)
 
---TODO:IMPORTANTE. A partir de aquí copiado de Claude. REVISAR
 -----------------------------------
--- Estados 1-10: todos devuelven False en el Bool salvo estado4
--- (los demás no tocan la tabla de símbolos)
 
-estadoNum :: String -> GError -> TablaSimbolos -> String -> Int -> Resultado
-estadoNum [] ge ts _ ne =
-    (genEntero ge ne, [], ge, ts, False)
-estadoNum (c:cs) ge ts lex ne
-    | isDigit c = estadoNum cs ge ts (lex ++ [c]) (ne * 10 + digitToInt c)
-    | c == '.'  = estadoPuntoDec cs ge ts ne
-    | otherwise = (genEntero ge ne, c:cs, ge, ts, False)
+estadoNum :: String -> GError -> TablaSimbolos -> Int -> Resultado
+estadoNum [] ge ts ne =
+                    let (tok, ge') = genEntero ge ne
+                    in (tok, [], ge', ts, False)
 
-genEntero :: GError -> Int -> Maybe Token
+estadoNum (c:cs) ge ts ne
+    | isDigit c      = estadoNum cs ge ts (ne * 10 + digitToInt c)
+    | c == '.'       = estadoPuntoDec cs ge ts ne
+    | isAlpha c      = (Nothing, getNextNoAlfa (c:cs), (registrarError ErrNumInv ge), ts, False)
+    | otherwise      = 
+                    let (tok, ge') = genEntero ge ne
+                    in (tok, cs, ge', ts, False)
+
+genEntero :: GError -> Int -> (Maybe Token, GError)
 genEntero ge ne
-    | ne > maxEntero = Nothing   -- el error se registra en quien llama
-    | otherwise      = Just (TkEntero ne)
+    | ne > maxEntero = (Nothing, registrarError ErrMaxEnt ge)
+    | otherwise      = (Just (TkEntero ne), ge)
 
 ------------------------------------------------------
 
 estadoPuntoDec :: String -> GError -> TablaSimbolos -> Int -> Resultado
 estadoPuntoDec [] ge ts _ =
-    (Nothing, [], registrarError 2 ge, ts, False)
+    (Nothing, [], registrarError ErrNoDec ge, ts, False)
+
 estadoPuntoDec (c:cs) ge ts ne
     | isDigit c = estadoReal cs ge ts ne (fromIntegral (digitToInt c)) 1
-    | otherwise = (Nothing, c:cs, registrarError 2 ge, ts, False)
+    | otherwise = (Nothing, (getNextNoAlfa (c:cs)), registrarError ErrNumInv ge, ts, False)
 
 ------------------------------------------------------
 
@@ -86,63 +101,66 @@ estadoReal :: String -> GError -> TablaSimbolos -> Int -> Float -> Int -> Result
 estadoReal [] ge ts ne dec ndec =
     let (tok, ge') = genReal ge ne dec ndec
     in (tok, [], ge', ts, False)
+
 estadoReal (c:cs) ge ts ne dec ndec
     | isDigit c = estadoReal cs ge ts ne (dec * 10 + fromIntegral (digitToInt c)) (ndec + 1)
-    | otherwise =
-        let (tok, ge') = genReal ge ne dec ndec
-        in (tok, c:cs, ge', ts, False)
+    | isAlpha c = (Nothing, getNextNoAlfa cs, (registrarError ErrNumInv ge), ts, False)
+    | otherwise = 
+                    let (tok, ge') = genReal ge ne dec ndec
+                    in (tok, (c:cs), ge', ts, False)
 
 genReal :: GError -> Int -> Float -> Int -> (Maybe Token, GError)
 genReal ge ne dec ndec =
     let valor = fromIntegral ne + dec / (10.0 ^ ndec)
     in if valor > maxReal
-        then (Nothing, registrarError 24 ge)
+        then (Nothing, registrarError ErrMaxReal ge)
         else (Just (TkReal valor), ge)
 
 ------------------------------------------------------
 
--- Estado 4: único que puede insertar en la tabla de símbolos
-estadoVar :: String -> GError -> TablaSimbolos -> String -> Resultado
-estadoVar [] ge ts lex = resolverIdent [] ge ts lex
-estadoVar (c:cs) ge ts lex
-    | isAlphaNum c || c == '_' = estadoVar cs ge ts (lex ++ [c])
-    | otherwise                = resolverIdent (c:cs) ge ts lex
+-- Unico estado que puede insertar en la tabla de símbolos
+estadoIdent :: String -> GError -> TablaSimbolos -> String -> Resultado
+estadoIdent [] ge ts lexem = resolverIdent [] ge ts lexem
+
+estadoIdent (c:cs) ge ts lexem
+    | isAlphaNum c || c == '_' = estadoIdent cs ge ts (lexem ++ [c])
+    | otherwise                = resolverIdent (c:cs) ge ts lexem
 
 resolverIdent :: String -> GError -> TablaSimbolos -> String -> Resultado
-resolverIdent resto ge ts lex =
-    case identificadorACode lex of
+resolverIdent resto ge ts lexem =
+    case identificadorACode lexem of
         Just tk ->
             -- Palabra reservada: no toca la TS
             (Just tk, resto, ge, ts, False)
         Nothing ->
             -- Identificador: insertar o buscar
-            let (pos, ts', insertado) = insertarOBuscar lex ts
+            let (pos, ts', insertado) = insertarOBuscar lexem ts
             in (Just (TkIdentificador pos), resto, ge, ts', insertado)
 
 ------------------------------------------------------
 
 estadoCad :: String -> GError -> TablaSimbolos -> String -> Int -> Resultado
 estadoCad [] ge ts _ _ =
-    (Nothing, [], registrarError 5 ge, ts, False)
-estadoCad (c:cs) ge ts lex cont
+    (Nothing, [], registrarError ErrCadNoCer ge, ts, False)
+estadoCad (c:cs) ge ts lexem cont
     | c == '"'  =
         if cont >= maxCadena
-            then (Nothing, cs, registrarError 28 ge, ts, False)
-            else (Just (TkCadena lex), cs, ge, ts, False)
-    | c == '\\' = estadoCarEsp cs ge ts lex cont
-    | c == '\t' = (Nothing, cs, registrarError 4 ge, ts, False)
-    | c == '\n' = (Nothing, cs, registrarError 5 (nuevaLinea ge), ts, False)
-    | otherwise = estadoCad cs ge ts (lex ++ [c]) (cont + 1)
+            then (Nothing, cs, registrarError ErrMaxCad ge, ts, False)
+            else (Just (TkCadena lexem), cs, ge, ts, False)
+    | c == '\\' = estadoCarEsp cs ge ts lexem cont
+    | c == '\t' = (Nothing, cs, registrarError ErrTab ge, ts, False)
+    | c == '\n' = (Nothing, cs, registrarError ErrCadNoCer (nuevaLinea ge), ts, False)
+    | otherwise = estadoCad cs ge ts (lexem ++ [c]) (cont + 1)
 
 ------------------------------------------------------
 
 estadoCarEsp :: String -> GError -> TablaSimbolos -> String -> Int -> Resultado
 estadoCarEsp [] ge ts _ _ =
-    (Nothing, [], registrarError 6 ge, ts, False)
-estadoCarEsp (c:cs) ge ts lex cont
-    | c == 'n'  = estadoCad cs ge ts (lex ++ "\n") (cont + 1)
-    | c == 't'  = estadoCad cs ge ts (lex ++ "\t") (cont + 1)
-    | otherwise = (Nothing, c:cs, registrarError 6 ge, ts, False)
+    (Nothing, [], registrarError ErrEscNoVal ge, ts, False)
+estadoCarEsp (c:cs) ge ts lexem cont
+    | c == 'n'  = estadoCad cs ge ts (lexem ++ "\\n") (cont + 1)
+    | c == 't'  = estadoCad cs ge ts (lexem ++ "\\t") (cont + 1)
+    | otherwise = (Nothing, c:cs, registrarError ErrEscNoVal ge, ts, False)
 
 ------------------------------------------------------
 
@@ -164,26 +182,26 @@ estadoMayor (c:cs) ge ts
 
 estadoAnd :: String -> GError -> TablaSimbolos -> Resultado
 estadoAnd [] ge ts =
-    (Nothing, [], registrarError 9 ge, ts, False)
+    (Nothing, [], registrarError ErrAndInc ge, ts, False)
 estadoAnd (c:cs) ge ts
     | c == '&'  = (Just TkAnd, cs, ge, ts, False)
-    | otherwise = (Nothing, c:cs, registrarError 9 ge, ts, False)
+    | otherwise = (Nothing, c:cs, registrarError ErrAndInc ge, ts, False)
 
 ------------------------------------------------------
 
-estadoDiv :: String -> GError -> TablaSimbolos -> Resultado
-estadoDiv [] ge ts =
-    (Nothing, [], registrarError 10 ge, ts, False)
-estadoDiv (c:cs) ge ts
-    | c == '/'  = estadoComentario cs ge ts
-    | otherwise = (Nothing, c:cs, registrarError 10 ge, ts, False)
+estadoInCom :: String -> GError -> TablaSimbolos -> Resultado
+estadoInCom [] ge ts =
+    (Nothing, [], registrarError ErrComen ge, ts, False)
+estadoInCom (c:cs) ge ts
+    | c == '/'  = estadoComen cs ge ts
+    | otherwise = (Nothing, c:cs, registrarError ErrComen ge, ts, False)
 
 ------------------------------------------------------
 
-estadoComentario :: String -> GError -> TablaSimbolos -> Resultado
-estadoComentario [] ge ts = (Just TkEof, [], ge, ts, False)
-estadoComentario (c:cs) ge ts
+estadoComen :: String -> GError -> TablaSimbolos -> Resultado
+estadoComen [] ge ts = (Just TkEof, [], ge, ts, False)
+estadoComen (c:cs) ge ts
     | c == '\n' = estadoIn cs (nuevaLinea ge) ts
-    | otherwise = estadoComentario cs ge ts
+    | otherwise = estadoComen cs ge ts
 ------------------------------------------------------
 

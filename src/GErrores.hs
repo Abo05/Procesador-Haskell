@@ -8,7 +8,7 @@ data GError = GError
 
 data Error = Error
     { errLinea :: Int
-    , errCodigo :: Int
+    , errCodigo :: CodErr
     , errMensaje :: String
     } deriving (Eq)
 
@@ -30,7 +30,7 @@ nuevaLinea ge = ge
     }
 
 -- Cada vez crea una nueva variable de GErrores
-registrarError :: Int -> GError -> GError
+registrarError :: CodErr -> GError -> GError
 registrarError cod ge =
         let err = Error
                 { errLinea    = linea ge
@@ -46,17 +46,36 @@ hayErrores ge = not (null(errores ge))
 listarErrores :: GError -> [Error]
 listarErrores = reverse . errores
 
+data CodErr 
+             = ErrCarNoEsp
+             | ErrNoDec
+             | ErrTab
+             | ErrCadNoCer
+             | ErrEscNoVal
+             | ErrAndInc
+             | ErrComen
+             | ErrCarDesc
+             | ErrMaxEnt
+             | ErrMaxReal
+             | ErrMaxCad
+             | ErrNumInv
+             | ErrIdInv
+             deriving Eq
+
 -- El número tiene que ver con el estado en el que me encuentro
-mensajeError :: Int -> String
-mensajeError 0  = "carácter \\ o '.' no esperado en estado inicial"
-mensajeError 2  = "número real con parte decimal faltante"
-mensajeError 4  = "carácter TAB no permitido en cadena"
-mensajeError 5  = "cadena no cerrada correctamente"
-mensajeError 6  = "secuencia de escape no válida"
-mensajeError 9  = "operador and incompleto"
-mensajeError 10 = "otra / esperada para inicio de comentario"
-mensajeError 11 = "carácter desconocido"
-mensajeError 21 = "valor entero excede el máximo permitido"
-mensajeError 24 = "valor real excede el máximo permitido"
-mensajeError 28 = "cadena excede el número máximo de caracteres"
-mensajeError _  = "error desconocido"
+mensajeError :: CodErr -> String
+mensajeError ErrCarNoEsp  = "carácter no esperado"
+mensajeError ErrNoDec     = "número real con parte decimal faltante"
+mensajeError ErrTab       = "carácter TAB no permitido en cadena"
+mensajeError ErrCadNoCer  = "cadena no cerrado correctamente"
+mensajeError ErrEscNoVal  = "secuencia de escape no válida"
+mensajeError ErrAndInc    = "operador and incompleto"
+mensajeError ErrComen     = "otra / esperada para inicio de comentario"
+mensajeError ErrCarDesc   = "carácter desconocido"
+mensajeError ErrMaxEnt    = "valor entero excede el máximo permitido"
+mensajeError ErrMaxReal   = "valor real excede el máximo permitido"
+mensajeError ErrMaxCad    = "cadena excede el número máximo de caracteres"
+mensajeError ErrNumInv    = "carácter inesperado después de número"
+mensajeError ErrIdInv     = "identificador con carácter no válido"
+-- mensajeError _  = "error desconocido"
+-- TODO: Ver si tiene sentido esa línea

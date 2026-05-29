@@ -28,3 +28,8 @@ cabal.project.local~
 *~
 Session.vim
 tags
+
+# ==========================================
+# Los archivos de output
+# ==========================================
+output/*
