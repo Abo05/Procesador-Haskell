@@ -1,5 +1,0 @@
-CONTENIDO DE LA TABLA # 1 :
-* LEXEMA : 'x'
-        +Atributos:
-* LEXEMA : 'bool'
-        +Atributos:

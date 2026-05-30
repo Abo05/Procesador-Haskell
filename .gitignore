@@ -33,3 +33,4 @@ tags
 # Los archivos de output
 # ==========================================
 output/*
+!output/.gitkeep
