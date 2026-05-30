@@ -100,3 +100,12 @@ atributoTk (TkReal f)          = show f
 atributoTk (TkCadena s)        = s
 atributoTk (TkIdentificador i) = show i
 atributoTk _                   = ""
+
+--Compara Tokens
+mismoTipo :: Token -> Token -> Bool
+mismoTipo (TkEntero _)          (TkEntero _)        = True
+mismoTipo (TkReal _)            (TkReal _)          = True
+mismoTipo (TkCadena _)          (TkCadena _)        = True
+mismoTipo (TkIdentificador _)   (TkIdentificador _) = True
+mismoTipo a                     b                   = a==b
+

@@ -39,6 +39,15 @@ registrarError cod ge =
                 }
         in ge { errores = err : errores ge }
 
+--TODO:Este solo lo tengo en Asin, el de arriba solo en Alex, unificar o cambiar el nombre del de arriba
+registrarErrorAsin :: CodErr -> String -> GError -> GError
+registrarErrorAsin cod msg ge = let err = Error
+                                            { errLinea    = linea ge
+                                            , errCodigo   = cod
+                                            , errMensaje  = msg
+                                            }
+                                in ge {errores = err : errores ge}
+
 hayErrores :: GError -> Bool
 hayErrores ge = not (null(errores ge))
 
@@ -60,6 +69,8 @@ data CodErr
              | ErrMaxCad
              | ErrNumInv
              | ErrIdInv
+             | ErrNoTerminal
+             | ErrTerminal
              deriving Eq
 
 -- El número tiene que ver con el estado en el que me encuentro
