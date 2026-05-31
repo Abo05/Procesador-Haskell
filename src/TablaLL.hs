@@ -1,7 +1,7 @@
 module TablaLL (tablaLL, Regla(..)) where
 
 import Simbolos (Simbolo(..), NoTerminal(..))
-import Token (Token(..))
+import Token (Token(..), mismoTipo)
 
 -- Una regla tiene: número de regla y consecuente 
 data Regla = Regla
@@ -12,10 +12,8 @@ data Regla = Regla
 -- La tabla: dado un no terminal y el token actual, devuelve la regla o Nothin(Error)
 tablaLL :: NoTerminal -> Token -> Maybe Regla
 
---TODO:Mirar, lo ha hecho claude y tiene pinta que lo ha hecho mal
 --   A 
-tablaLL A TkInt     = Just $ Regla 54 [NoTerminal T, Terminal TkInt,    NoTerminal K]
--- Los tres casos de T id K comparten la misma forma; T se expande después
+tablaLL A TkInt     = Just $ Regla 54 [NoTerminal T, Terminal (TkIdentificador 0),    NoTerminal K]
 tablaLL A TkString  = Just $ Regla 54 [NoTerminal T, Terminal (TkIdentificador 0), NoTerminal K]
 tablaLL A TkBoolean = Just $ Regla 54 [NoTerminal T, Terminal (TkIdentificador 0), NoTerminal K]
 tablaLL A TkFloat   = Just $ Regla 54 [NoTerminal T, Terminal (TkIdentificador 0), NoTerminal K]
@@ -23,13 +21,14 @@ tablaLL A TkVoid    = Just $ Regla 55 [Terminal TkVoid]
 
 --   B 
 tablaLL B (TkIdentificador _) = Just $ Regla 46 [NoTerminal S]
+tablaLL B TkRead   = Just $ Regla 46 [NoTerminal S]
+tablaLL B TkReturn = Just $ Regla 46 [NoTerminal S]
+tablaLL B TkWrite  = Just $ Regla 46 [NoTerminal S]
+
 tablaLL B TkLet    = Just $ Regla 45 [Terminal TkLet, NoTerminal T,
                                          Terminal (TkIdentificador 0), Terminal TkPuntoComa]
 tablaLL B TkIf     = Just $ Regla 38 [Terminal TkIf, Terminal TkParentesisA,
                                          NoTerminal E, Terminal TkParentesisC, NoTerminal Z]
-tablaLL B TkRead   = Just $ Regla 46 [NoTerminal S]
-tablaLL B TkReturn = Just $ Regla 46 [NoTerminal S]
-tablaLL B TkWrite  = Just $ Regla 46 [NoTerminal S]
 
 --    C
 tablaLL C (TkIdentificador _) = Just $ Regla 58 [NoTerminal B, NoTerminal C]
@@ -47,16 +46,23 @@ tablaLL D TkIf     = Just $ Regla 43 [Terminal TkIf, Terminal TkParentesisA, NoT
                                          NoTerminal C, Terminal TkLlaveC, NoTerminal I]
 
 --    E
-tablaLL E tok | tokEnFirst tok = Just $ Regla 1 [NoTerminal R, NoTerminal E1]
-  where
-    tokEnFirst t = t `elem`
-        [ TkEntero 0, TkReal 0, TkCadena "", TkTrue, TkFalse
-        , TkParentesisA, TkSuma, TkResta, TkNot, TkAutodecremento
-        , TkIdentificador 0 ]
+tablaLL E tok 
+            | mismoTipo tok (TkEntero 0)        = Just $ Regla 1 [NoTerminal R, NoTerminal E1]
+            | mismoTipo tok (TkReal 0)          = Just $ Regla 1 [NoTerminal R, NoTerminal E1]
+            | mismoTipo tok (TkCadena "")       = Just $ Regla 1 [NoTerminal R, NoTerminal E1]
+            | mismoTipo tok TkTrue              = Just $ Regla 1 [NoTerminal R, NoTerminal E1]
+            | mismoTipo tok TkFalse             = Just $ Regla 1 [NoTerminal R, NoTerminal E1]
+            | mismoTipo tok TkParentesisA       = Just $ Regla 1 [NoTerminal R, NoTerminal E1]
+            | mismoTipo tok TkSuma              = Just $ Regla 1 [NoTerminal R, NoTerminal E1]
+            | mismoTipo tok TkResta             = Just $ Regla 1 [NoTerminal R, NoTerminal E1]
+            | mismoTipo tok TkNot               = Just $ Regla 1 [NoTerminal R, NoTerminal E1]
+            | mismoTipo tok TkAutodecremento    = Just $ Regla 1 [NoTerminal R, NoTerminal E1]
+            | mismoTipo tok (TkIdentificador 0) = Just $ Regla 1 [NoTerminal R, NoTerminal E1]
+
 
 --    E1
-tablaLL E1 TkParentesisC = Just $ Regla 3 []
 tablaLL E1 TkAnd         = Just $ Regla 2 [Terminal TkAnd, NoTerminal R, NoTerminal E1]
+tablaLL E1 TkParentesisC = Just $ Regla 3 []
 tablaLL E1 TkPuntoComa   = Just $ Regla 3 []
 tablaLL E1 TkComa        = Just $ Regla 3 []
 tablaLL E1 TkEof         = Just $ Regla 3 []
@@ -92,19 +98,34 @@ tablaLL K TkComa        = Just $ Regla 56
     [Terminal TkComa, NoTerminal T, Terminal (TkIdentificador 0), NoTerminal K]
 
 --    L
-tablaLL L tok | tokEnFirstE tok = Just $ Regla 32 [NoTerminal E, NoTerminal Q]
-  where tokEnFirstE t = t `elem`
-            [ TkEntero 0, TkReal 0, TkCadena "", TkTrue, TkFalse
-            , TkParentesisA, TkSuma, TkResta, TkNot, TkAutodecremento
-            , TkIdentificador 0 ]
-tablaLL L TkParentesisC         = Just $ Regla 33 []
+tablaLL L tok 
+            | mismoTipo tok (TkEntero 0)        = Just $ Regla 32 [NoTerminal E, NoTerminal Q]
+            | mismoTipo tok (TkReal 0)          = Just $ Regla 32 [NoTerminal E, NoTerminal Q]
+            | mismoTipo tok (TkCadena "")       = Just $ Regla 32 [NoTerminal E, NoTerminal Q]
+            | mismoTipo tok TkTrue              = Just $ Regla 32 [NoTerminal E, NoTerminal Q]
+            | mismoTipo tok TkFalse             = Just $ Regla 32 [NoTerminal E, NoTerminal Q]
+            | mismoTipo tok TkParentesisA       = Just $ Regla 32 [NoTerminal E, NoTerminal Q]
+            | mismoTipo tok TkSuma              = Just $ Regla 32 [NoTerminal E, NoTerminal Q]
+            | mismoTipo tok TkResta             = Just $ Regla 32 [NoTerminal E, NoTerminal Q]
+            | mismoTipo tok TkNot               = Just $ Regla 32 [NoTerminal E, NoTerminal Q]
+            | mismoTipo tok TkAutodecremento    = Just $ Regla 32 [NoTerminal E, NoTerminal Q]
+            | mismoTipo tok (TkIdentificador 0) = Just $ Regla 32 [NoTerminal E, NoTerminal Q]
+             
+tablaLL L TkParentesisC = Just $ Regla 33 []
 
 --    O
 tablaLL O TkParentesisA = Just $ Regla 24
     [Terminal TkParentesisA, NoTerminal L, Terminal TkParentesisC]
-tablaLL O tok | tok `elem` [TkSuma, TkResta, TkMayor, TkMayorIgual,
-                               TkPuntoComa, TkComa, TkAnd, TkParentesisC]
-                = Just $ Regla 25 []
+tablaLL O tok = case tok of
+                    TkSuma          -> Just $ Regla 25 []
+                    TkResta         -> Just $ Regla 25 []
+                    TkMayor         -> Just $ Regla 25 []
+                    TkMayorIgual    -> Just $ Regla 25 []
+                    TkPuntoComa     -> Just $ Regla 25 []
+                    TkComa          -> Just $ Regla 25 []
+                    TkAnd           -> Just $ Regla 25 []
+                    TkParentesisC   -> Just $ Regla 25 []
+                    _               -> Nothing
 
 --    P
 tablaLL P (TkIdentificador _) = Just $ Regla 60 [NoTerminal B, NoTerminal P]
@@ -121,11 +142,18 @@ tablaLL Q TkComa        = Just $ Regla 34 [Terminal TkComa, NoTerminal E, NoTerm
 tablaLL Q TkParentesisC = Just $ Regla 35 []
 
 --    R
-tablaLL R tok | tokEnFirstE tok = Just $ Regla 4 [NoTerminal U, NoTerminal R1]
-  where tokEnFirstE t = t `elem`
-            [ TkEntero 0, TkReal 0, TkCadena "", TkTrue, TkFalse
-            , TkParentesisA, TkSuma, TkResta, TkNot, TkAutodecremento
-            , TkIdentificador 0 ]
+tablaLL R tok 
+            | mismoTipo tok (TkEntero 0)        = Just $ Regla 4 [NoTerminal U, NoTerminal R1]
+            | mismoTipo tok (TkReal 0)          = Just $ Regla 4 [NoTerminal U, NoTerminal R1]
+            | mismoTipo tok (TkCadena "")       = Just $ Regla 4 [NoTerminal U, NoTerminal R1]
+            | mismoTipo tok TkTrue              = Just $ Regla 4 [NoTerminal U, NoTerminal R1]
+            | mismoTipo tok TkFalse             = Just $ Regla 4 [NoTerminal U, NoTerminal R1]
+            | mismoTipo tok TkParentesisA       = Just $ Regla 4 [NoTerminal U, NoTerminal R1]
+            | mismoTipo tok TkSuma              = Just $ Regla 4 [NoTerminal U, NoTerminal R1]
+            | mismoTipo tok TkResta             = Just $ Regla 4 [NoTerminal U, NoTerminal R1]
+            | mismoTipo tok TkNot               = Just $ Regla 4 [NoTerminal U, NoTerminal R1]
+            | mismoTipo tok TkAutodecremento    = Just $ Regla 4 [NoTerminal U, NoTerminal R1]
+            | mismoTipo tok (TkIdentificador 0) = Just $ Regla 4 [NoTerminal U, NoTerminal R1]
 
 --    R1
 tablaLL R1 TkParentesisC = Just $ Regla 7 []
@@ -152,11 +180,18 @@ tablaLL T TkBoolean = Just $ Regla 49 [Terminal TkBoolean]
 tablaLL T TkFloat   = Just $ Regla 48 [Terminal TkFloat]
 
 --    U
-tablaLL U tok | tokEnFirstE tok = Just $ Regla 8 [NoTerminal V, NoTerminal U1]
-  where tokEnFirstE t = t `elem`
-            [ TkEntero 0, TkReal 0, TkCadena "", TkTrue, TkFalse
-            , TkParentesisA, TkSuma, TkResta, TkNot, TkAutodecremento
-            , TkIdentificador 0 ]
+tablaLL U tok 
+            | mismoTipo tok (TkEntero 0)        = Just $ Regla 8 [NoTerminal V, NoTerminal U1]
+            | mismoTipo tok (TkReal 0)          = Just $ Regla 8 [NoTerminal V, NoTerminal U1]
+            | mismoTipo tok (TkCadena "")       = Just $ Regla 8 [NoTerminal V, NoTerminal U1]
+            | mismoTipo tok TkTrue              = Just $ Regla 8 [NoTerminal V, NoTerminal U1]
+            | mismoTipo tok TkFalse             = Just $ Regla 8 [NoTerminal V, NoTerminal U1]
+            | mismoTipo tok TkParentesisA       = Just $ Regla 8 [NoTerminal V, NoTerminal U1]
+            | mismoTipo tok TkSuma              = Just $ Regla 8 [NoTerminal V, NoTerminal U1]
+            | mismoTipo tok TkResta             = Just $ Regla 8 [NoTerminal V, NoTerminal U1]
+            | mismoTipo tok TkNot               = Just $ Regla 8 [NoTerminal V, NoTerminal U1]
+            | mismoTipo tok TkAutodecremento    = Just $ Regla 8 [NoTerminal V, NoTerminal U1]
+            | mismoTipo tok (TkIdentificador 0) = Just $ Regla 8 [NoTerminal V, NoTerminal U1]
 
 --    U1
 tablaLL U1 TkParentesisC = Just $ Regla 11 []
@@ -169,14 +204,19 @@ tablaLL U1 TkPuntoComa   = Just $ Regla 11 []
 tablaLL U1 TkComa        = Just $ Regla 11 []
 
 --    V
-tablaLL V tok | tok `elem` [ TkEntero 0, TkReal 0, TkCadena ""
-                              , TkTrue, TkFalse, TkParentesisA
-                              , TkIdentificador 0 ]
-                = Just $ Regla 16 [NoTerminal W]
-tablaLL V TkSuma          = Just $ Regla 12 [Terminal TkSuma,  NoTerminal W]
-tablaLL V TkResta         = Just $ Regla 13 [Terminal TkResta, NoTerminal W]
-tablaLL V TkNot           = Just $ Regla 14 [Terminal TkNot,   NoTerminal W]
-tablaLL V TkAutodecremento= Just $ Regla 15
+tablaLL V tok 
+            | mismoTipo tok (TkEntero 0)        = Just $ Regla 16 [NoTerminal W]
+            | mismoTipo tok (TkReal 0)          = Just $ Regla 16 [NoTerminal W]
+            | mismoTipo tok (TkCadena "")       = Just $ Regla 16 [NoTerminal W]
+            | mismoTipo tok TkTrue              = Just $ Regla 16 [NoTerminal W]
+            | mismoTipo tok TkFalse             = Just $ Regla 16 [NoTerminal W]
+            | mismoTipo tok TkParentesisA       = Just $ Regla 16 [NoTerminal W]
+            | mismoTipo tok (TkIdentificador 0) = Just $ Regla 16 [NoTerminal W]
+
+tablaLL V TkSuma            = Just $ Regla 12 [Terminal TkSuma,  NoTerminal W]
+tablaLL V TkResta           = Just $ Regla 13 [Terminal TkResta, NoTerminal W]
+tablaLL V TkNot             = Just $ Regla 14 [Terminal TkNot,   NoTerminal W]
+tablaLL V TkAutodecremento  = Just $ Regla 15
     [Terminal TkAutodecremento, Terminal (TkIdentificador 0)]
 
 --    W
@@ -191,11 +231,19 @@ tablaLL W (TkIdentificador _)= Just $ Regla 17
     [Terminal (TkIdentificador 0), NoTerminal O]
 
 --    X
-tablaLL X tok | tokEnFirstE tok = Just $ Regla 36 [NoTerminal E]
-  where tokEnFirstE t = t `elem`
-            [ TkEntero 0, TkReal 0, TkCadena "", TkTrue, TkFalse
-            , TkParentesisA, TkSuma, TkResta, TkNot, TkAutodecremento
-            , TkIdentificador 0 ]
+tablaLL X tok 
+            | mismoTipo tok (TkEntero 0)        = Just $ Regla 36 [NoTerminal E]
+            | mismoTipo tok (TkReal 0)          = Just $ Regla 36 [NoTerminal E]
+            | mismoTipo tok (TkCadena "")       = Just $ Regla 36 [NoTerminal E]
+            | mismoTipo tok TkTrue              = Just $ Regla 36 [NoTerminal E]
+            | mismoTipo tok TkFalse             = Just $ Regla 36 [NoTerminal E]
+            | mismoTipo tok TkParentesisA       = Just $ Regla 36 [NoTerminal E]
+            | mismoTipo tok TkSuma              = Just $ Regla 36 [NoTerminal E]
+            | mismoTipo tok TkResta             = Just $ Regla 36 [NoTerminal E]
+            | mismoTipo tok TkNot               = Just $ Regla 36 [NoTerminal E]
+            | mismoTipo tok TkAutodecremento    = Just $ Regla 36 [NoTerminal E]
+            | mismoTipo tok (TkIdentificador 0) = Just $ Regla 36 [NoTerminal E]
+
 tablaLL X TkPuntoComa = Just $ Regla 37 []
 
 --    Z

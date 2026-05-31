@@ -44,8 +44,8 @@ parsear input ge ts hTok hTS hParse =
             -- Escribir token en Tokens.txt
             hPutStrLn hTok (formatToken tok')
             -- Si es identificador nuevo, escribir en TablaSimbolos.txt
-            insertadoEnTs tok' insertado ts' hParse
-                
+            insertadoEnTs tok' insertado ts' hTS
+
             bucleAsin resto ge' ts' hTok hTS hParse pilaInicial tok'
 
 bucleAsin :: String -> GError -> TablaSimbolos 
@@ -76,7 +76,7 @@ bucleAsin input ge ts hTok hTS hParse (Terminal cima : resto) tok =
                     -- Escribir token en Tokens.txt
                     hPutStrLn hTok (formatToken tokSig)
                     -- Si es identificador nuevo, escribir en TablaSimbolos.txt
-                    insertadoEnTs tokSig insertado ts' hParse
+                    insertadoEnTs tokSig insertado ts' hTS
                     bucleAsin input' ge' ts' hTok hTS hParse resto tokSig
 
         else do
@@ -102,7 +102,8 @@ bucleAsin input ge ts hTok hTS hParse (NoTerminal nt : resto) tok =
             -- Escribimos el número de la regla
             hPutStr hParse (show n ++ " ")
             -- Añadimos el consecuente en orden inverso
-            let pilaNueva = reverse cons ++ resto
+            let pilaNueva = cons ++ resto
+            --putStrLn ("Pila:" ++ show pilaNueva)
             bucleAsin input ge ts hTok hTS hParse pilaNueva tok
 
 
