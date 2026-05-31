@@ -1,0 +1,28 @@
+\babel@toc {spanish}{}\relax 
+\contentsline {section}{\numberline {1}Diseño del analizador léxico}{2}{}%
+\contentsline {subsection}{\numberline {1.1}Tokens}{2}{}%
+\contentsline {subsection}{\numberline {1.2}Gramática}{2}{}%
+\contentsline {subsection}{\numberline {1.3}Diagrama del autómata y acciones semánticas}{3}{}%
+\contentsline {subsection}{\numberline {1.4}Descripción de las Acciones Semánticas}{3}{}%
+\contentsline {subsection}{\numberline {1.5}Errores}{4}{}%
+\contentsline {section}{\numberline {2}Diseño del analizador sintáctico}{5}{}%
+\contentsline {subsection}{\numberline {2.1}Gramática}{5}{}%
+\contentsline {subsection}{\numberline {2.2}Tabla}{5}{}%
+\contentsline {subsection}{\numberline {2.3}Errores}{7}{}%
+\contentsline {section}{\numberline {3}Diseño del analizador semántico}{8}{}%
+\contentsline {subsection}{\numberline {3.1}Errores}{11}{}%
+\contentsline {section}{\numberline {4}Diseño de la tabla de símbolos}{12}{}%
+\contentsline {section}{\numberline {5}Diseño del gestor de errores}{13}{}%
+\contentsline {section}{\numberline {6}Anexo: ficheros de prueba}{14}{}%
+\contentsline {subsection}{\numberline {6.1}Ficheros correctos}{14}{}%
+\contentsline {subsubsection}{\numberline {6.1.1}Fichero 1}{14}{}%
+\contentsline {subsubsection}{\numberline {6.1.2}Fichero 2}{14}{}%
+\contentsline {subsubsection}{\numberline {6.1.3}Fichero 3}{14}{}%
+\contentsline {subsubsection}{\numberline {6.1.4}Fichero 4}{15}{}%
+\contentsline {subsubsection}{\numberline {6.1.5}Fichero 5}{15}{}%
+\contentsline {subsection}{\numberline {6.2}Ficheros con errores}{15}{}%
+\contentsline {subsubsection}{\numberline {6.2.1}Fichero 1}{15}{}%
+\contentsline {subsubsection}{\numberline {6.2.2}Fichero 2}{15}{}%
+\contentsline {subsubsection}{\numberline {6.2.3}Fichero 3}{16}{}%
+\contentsline {subsubsection}{\numberline {6.2.4}Fichero 4}{16}{}%
+\contentsline {subsubsection}{\numberline {6.2.5}Fichero 5}{16}{}%
