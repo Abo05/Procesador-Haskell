@@ -52,15 +52,15 @@
     frame=single % Añade un marco alrededor del código
 }
 
-\title{MEMORIA PROCESADOR DE MYJS}
+\title{MEMORIA CUARTA PRACTICA:\\ PROCESADOR DE LENGUAJE EN HASKELL}
 \date{\today}
-\author{Acedo Blanco, Alvaro \\ Czepiel, Daniel \\ Grupo 96}
+\author{Acedo Blanco, Alvaro \\ Czepiel, Daniel}
 
 \begin{document}
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=60pt]{./draco.png}
+    \includegraphics[width=100pt]{./haskell.png}
     \label{fig:draco}
 \end{figure}
 
@@ -69,9 +69,52 @@
 
 \newpage
 
+\section{¿Qué es un procesador?}
+
+\subsection{Objetivo de la práctica}
+
+Un procesador se encarga de analizar un fichero que debe de estar escrito en un determinado lenguaje formal, como Java, C, ... 
+(aunque no tiene que ser un lenguaje de programación). Recibe como entrada un fichero a procesar y devuelve otra representación del fichero, 
+más adecuada para el proposito que se persigue, o correcto; o si el fichero contiene errores, un mensaje de error claro que permite corregir el fichero\\
+En el mundo de los lenguajes de progrmación, es un paso previo a la generación del código objeto para hacer un ejecutable del codigo.
+
+\subsection{Módulos de un procesador}
+
+Un procesador se puede dividir principalmente en los siguientes módulos interconectados, los cuales suelen actuar en forma de \textit{pipeline} o cascada, donde la salida de una fase sirve como entrada directa para la siguiente:
+
+\medskip % Añadimos un pequeño espacio
+
+\noindent\begin{minipage}[t]{0.35\textwidth} % Columna de la figura (35% del ancho de página)
+    \begin{figure}[H] % Usamos figure[H] del paquete 'float'
+        \centering
+        \includegraphics[width=\textwidth]{./procesador.png} % Escalamos la imagen al ancho de la columna
+        \caption{Esquema del procesador.}
+        \label{fig:modulos-procesador}
+    \end{figure}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.6\textwidth} % Columna de la lista (60% del ancho de página)
+    \begin{enumerate}
+        \item \textbf{Analizador léxico (Scanner):} Es la primera fase del proceso. Su objetivo es leer el fichero de entrada carácter a carácter y agruparlos en unidades indivisibles con significado léxico, denominadas \textit{tokens} (como palabras reservadas, identificadores, números, operadores o símbolos de puntuación). Además, se encarga de "limpiar el código", descartando elementos innecesarios para la evaluación lógica, como los espacios en blanco, tabulaciones y comentarios. Internamente, el reconocimiento de estos \textit{tokens} se suele modelar mediante expresiones regulares y Autómatas Finitos Deterministas (AFD).
+        
+        \item \textbf{Analizador sintáctico (Parser):} Recibe el flujo de \textit{tokens} generado por la fase anterior y verifica que su disposición cumple con las reglas gramaticales del lenguaje formal. Su resultado suele ser una representación estructurada, como un Árbol de Sintaxis Abstracta (AST), que refleja la jerarquía de las operaciones.
+        
+        \item \textbf{Analizador semántico:} Toma la estructura generada por el analizador sintáctico y comprueba que, además de estar bien formada, tiene sentido y coherencia. Aquí se realizan tareas como la comprobación de tipos, la verificación del ámbito de las variables o asegurar que una variable ha sido declarada antes de usarse.
+        
+        \item \textbf{Tabla de símbolos:} Es una estructura de datos transversal al resto de analizadores. Actúa como un diccionario donde se registra información vital sobre los identificadores encontrados en el código (variables, funciones, etc.), guardando atributos como su tipo de dato, su ámbito de visibilidad o su posición de memoria.
+        
+        \item \textbf{Gestor de errores:} Es el módulo encargado de interceptar cualquier anomalía durante el proceso de compilación o interpretación. Su misión es recuperarse en la medida de lo posible y emitir mensajes de diagnóstico precisos, indicando la línea y la naturaleza del error para que el programador pueda solucionarlo.
+    \end{enumerate}
+\end{minipage}
+
+\subsection{Ámbito de la práctica}
+
+El desarrollo de esta práctica se centra en la implementación de un procesador utilizando el paradigma de programación funcional, concretamente mediante el lenguaje \textit{Haskell} dado en la asignatura. El objetivo principal es construir las fases iniciales descritas anteriormente: análisis léxico y sintáctico; haciendo especial hincapié en el modelado modular.\\
+Se querría haber desarrollado también el analizador semántico sin embargo, debido al tiempo dado para hacer la práctica y su coincidencia con otros trabajos y exámenes nos ha sido imposible terminar la realización de dicho módulo. No obstante, gracias al diseño estrictamente modular empleado en la arquitectura del sistema, se deja la estructura totalmente preparada y abierta para la incorporación futura de esta fase de análisis sin necesidad de reestructurar el núcleo del procesador ya desarrollado.
+
 \section{Diseño del analizador léxico}
 
-\subsection{Tokens}a
+\subsection{Tokens}
 
 Los tokens que usamos para el analizador léxico son:
 
@@ -389,255 +432,6 @@ Para los errores hemos tenido en cuenta:
     \item Expresiones con operandos incorrectas
     \item El cierre correcto del archivo con un final de bloque o de sentencia
 \end{itemize}
-\newpage
-
-\section{Diseño del analizador semántico}
-Hemos utilizado el siguiente EdT:
-
-\renewcommand{\arraystretch}{1.6} % Mejora la separación entre reglas
-
-% Usamos p{ancho} directamente para evitar errores de "Illegal pream-token"
-% El comando >{\raggedright\arraybackslash} asegura que el texto no se justifique feo
-\begin{longtable}{|c|>{\raggedright\arraybackslash}p{5.5cm}|>{\raggedright\arraybackslash}p{10cm}|}
-\hline
-\textbf{\#} & \textbf{Producción} & \textbf{Acciones Semánticas} \\ \hline
-\endhead
-
-\hline
-\multicolumn{3}{|r|}{\textit{Continúa en la siguiente página...}} \\
-\hline
-\endfoot
-
-\hline
-\endlastfoot
-
-% Regla 1
-1 & $E \to R \; E_1$ & 
-$E.tipo = \texttt{if}(E_1.tipo == \texttt{void} \lor R.tipo == E_1.tipo)$ \newline
-\hspace*{0.5cm} $\texttt{then } R.tipo$ \newline
-\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
-\texttt{\{AUX -= 2\}} \\ \hline
-
-% Regla 2
-2 & $E_1 \to \&\& \; R \; E_{1\_1}$ & 
-$E_1.tipo = \texttt{if}(R.tipo == \texttt{logico} \land E_{1\_1}.tipo \in \{\texttt{logico, void}\})$ \newline
-\hspace*{0.5cm} $\texttt{then } R.tipo$ \newline
-\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
-\texttt{\{AUX -= 3\}} \\ \hline
-
-% Regla 3
-3 & $E_1 \to \lambda$ & 
-$E_1.tipo = \texttt{void}$ \newline
-\texttt{\{AUX -= 0\}} \\ \hline
-
-% Regla 4
-4 & $R \to U \; R_1$ & 
-$R.tipo = \texttt{if}(R_1.tipo == \texttt{void}) \texttt{ then } U.tipo$ \newline
-\hspace*{0.5cm} $\texttt{else if}(U.tipo == R_1.tipo) \texttt{ then logico}$ \newline
-\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
-\texttt{\{AUX -= 2\}} \\ \hline
-
-% Regla 5
-5 & $R_{1\_1} \to > \; U \; R_{1\_2}$ & 
-$R_{1\_1}.tipo = \texttt{if}(U.tipo \in \{\texttt{real, entero}\} \land R_{1\_2} == \texttt{void})$ \newline
-\hspace*{0.5cm} $\texttt{then } U.tipo$ \newline
-\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
-\texttt{\{AUX -= 3\}} \\ \hline
-
-% Regla 6
-6 & $R_{1\_1} \to \ge \; U \; R_{1\_2}$ & 
-$R_{1\_1}.tipo = \texttt{if}(U.tipo \in \{\texttt{real, entero}\} \land R_{1\_2} == \texttt{void})$ \newline
-\hspace*{0.5cm} $\texttt{then } U.tipo$ \newline
-\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
-\texttt{\{AUX -= 3\}} \\ \hline
-
-% Regla 7
-7 & $R_1 \to \lambda$ & 
-$R_1.tipo = \texttt{void}$ \newline
-\texttt{\{AUX -= 0\}} \\ \hline
-
-% Regla 8
-8 & $U \to V \; U_1$ & 
-$U.tipo = \texttt{if}(U_1.tipo == \texttt{void} \lor V.tipo == U_1.tipo)$ \newline
-\hspace*{0.5cm} $\texttt{then } V.tipo$ \newline
-\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
-\texttt{\{AUX -= 2\}} \\ \hline
-
-% Regla 9
-9 & $U_1 \to + \; V \; U_{1\_1}$ & 
-$U_1.tipo = \texttt{if}((V.tipo \in \{\texttt{entero, real}\} \land U_{1\_1}.tipo == \texttt{void}) \lor V.tipo == U_{1\_1}.tipo)$ \newline
-\hspace*{0.5cm} $\texttt{then } V.tipo$ \newline
-\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
-\texttt{\{AUX -= 3\}} \\ \hline
-
-% Regla 10
-10 & $U_1 \to - \; V \; U_{1\_1}$ & 
-$U_1.tipo = \texttt{if}((V.tipo \in \{\texttt{entero, real}\} \land U_{1\_1}.tipo == \texttt{void}) \lor V.tipo == U_{1\_1}.tipo)$ \newline
-\hspace*{0.5cm} $\texttt{then } V.tipo$ \newline
-\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
-\texttt{\{AUX -= 3\}} \\ \hline
-
-% Regla 11
-11 & $U_1 \to \lambda$ & 
-$U_1.tipo = \texttt{void}$ \newline
-\texttt{\{AUX -= 0\}} \\ \hline
-
-% Regla 12
-12 & $V \to + \; W$ & 
-$V.tipo = \texttt{if}(W.tipo \in \{\texttt{entero, real}\}) \texttt{ then } W.tipo$ \newline
-\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
-\texttt{\{AUX -= 2\}} \\ \hline
-
-% Regla 13
-13 & $V \to - \; W$ & 
-$V.tipo = \texttt{if}(W.tipo \in \{\texttt{entero, real}\}) \texttt{ then } W.tipo$ \newline
-\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
-\texttt{\{AUX -= 2\}} \\ \hline
-
-% Regla 14
-14 & $V \to ! \; W$ & 
-$V.tipo = \texttt{if}(W.tipo == \texttt{lógico}) \texttt{ then tipo\_logico}$ \newline
-\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
-\texttt{\{AUX -= 2\}} \\ \hline
-
-% Regla 15
-15 & $V \to -- \; \mathbf{id}$ & 
-$V.tipo = \texttt{if}(\text{buscarTipo}(\mathbf{id}.pos) \in \{\texttt{real, entero}\})$ \newline
-\hspace*{0.5cm} $\texttt{then } \text{buscarTipo}(\mathbf{id}.pos)$ \newline
-\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
-\texttt{\{AUX -= 2\}} \\ \hline
-
-% Regla 16
-16 & $V \to W$ & 
-$V.tipo = W.tipo$ \newline
-\texttt{\{AUX -= 1\}} \\ \hline
-
-% Regla 17
-17 & $W \to \mathbf{id} \; O$ & 
-$W.tipo = \texttt{if}(O.tipo == \texttt{void}) \texttt{ then } \text{buscarTipo}(\mathbf{id}.pos)$ \newline
-\hspace*{0.5cm} $\texttt{else if}(\text{buscarParam}(\mathbf{id}.pos) == O.parametros)$ \newline
-\hspace*{1cm} $\texttt{then } \text{buscarTipoRet}(\mathbf{id}.pos)$ \newline
-\hspace*{1cm} $\texttt{else tipo\_error}$ \newline
-\texttt{\{AUX -= 2\}} \\ \hline
-
-% Regla 18
-18 & $W \to ( \; E \; )$ & 
-$W.tipo = E.tipo$ \newline
-\texttt{\{AUX -= 3\}} \\ \hline
-
-% Regla 19, 20, 21, 22, 23
-19 & $W \to \texttt{entero}$ & $W.tipo = \texttt{entero}$ \hspace{1cm} \texttt{\{AUX -= 1\}} \\ \hline
-20 & $W \to \texttt{real}$ & $W.tipo = \texttt{real}$ \hspace{1.2cm} \texttt{\{AUX -= 1\}} \\ \hline
-21 & $W \to \texttt{cadena}$ & $W.tipo = \texttt{cadena}$ \hspace{0.9cm} \texttt{\{AUX -= 1\}} \\ \hline
-22 & $W \to \texttt{true}$ & $W.tipo = \texttt{lógico}$ \hspace{1cm} \texttt{\{AUX -= 1\}} \\ \hline
-23 & $W \to \texttt{false}$ & $W.tipo = \texttt{lógico}$ \hspace{1cm} \texttt{\{AUX -= 1\}} \\ \hline
-
-% Regla 24
-24 & $O \to ( \; L \; )$ & 
-$O.tipo = \texttt{tipo\_funcion}$ \newline
-$O.parametros = L.parametros$ \newline
-$O.numParam = L.numeroParametros$ \newline
-\texttt{\{AUX -= 3\}} \\ \hline
-
-% Regla 25
-25 & $O \to \lambda$ & 
-$O.tipo = \texttt{void}$ \newline
-\texttt{\{AUX -= 0\}} \\ \hline
-
-% Regla 26
-26 & $S \to \mathbf{id} \; G \; ;$ & 
-$S.tipo = \texttt{if}(\text{buscarTipo}(\mathbf{id}.pos) == G.tipo == \texttt{tipo\_funcion})$ \newline
-\hspace*{0.5cm} $\texttt{then if}(\text{buscarParam}(\mathbf{id}.pos) \neq G.parametros) \texttt{ tipo\_error}$ \newline
-\hspace*{0.5cm} $\texttt{else if}(\text{buscarTipo}(\mathbf{id}.pos) \neq G.tipo) \texttt{ then tipo\_error}$ \newline
-\texttt{\{AUX -= 3\}} \\ \hline
-
-% Regla 27
-27 & $S \to \texttt{write} \; E \; ;$ & 
-$S.tipo = \texttt{if}(E.tipo \notin \{\texttt{entero, real, cadena}\}) \texttt{ then tipo\_error}$ \newline
-$S.tipoRet = \texttt{void}$ \newline
-\texttt{\{AUX -= 3\}} \\ \hline
-
-% Regla 28
-28 & $S \to \texttt{read} \; \mathbf{id} \; ;$ & 
-$S.tipo = \texttt{if}(\text{buscarTipoTS}(\mathbf{id}.pos) \notin \{\texttt{entero, real, cadena}\})$ \newline
-\hspace*{0.5cm} $\texttt{then tipo\_error}$ \newline
-$S.tipoRet = \texttt{void}$ \newline
-\texttt{\{AUX -= 3\}} \\ \hline
-
-% Regla 29
-29 & $S \to \texttt{return} \; X \; ;$ & 
-$S.tipo = \texttt{if}(X.tipo \neq S.tipoRet) \texttt{ then tipo\_error}$ \newline
-\texttt{\{AUX -= 3\}} \\ \hline
-
-% Regla 30
-30 & $G \to = \; E$ & 
-$G.tipo = E.tipo$ \newline
-\texttt{\{AUX -= 2\}} \\ \hline
-
-% Regla 31
-31 & $G \to ( \; L \; )$ & 
-$G.tipo = \texttt{tipo\_funcion}$ \newline
-$G.parametros = L.parametros, G.numParam = L.numParametros$ \newline
-\texttt{\{AUX -= 3\}} \\ \hline
-
-% Regla 32, 33, 34, 35
-32 & $L \to E \; Q$ & $L.param = E.tipo \times Q.param, L.numP = 1 + Q.numP$ \newline \texttt{\{AUX -= 2\}} \\ \hline
-33 & $L \to \lambda$ & $L.param = \texttt{void}, L.numP = 0$ \hspace{1cm} \texttt{\{AUX -= 0\}} \\ \hline
-34 & $Q_1 \to , \; E \; Q_2$ & $Q_1.param = E.tipo \times Q_2.param, Q_1.numP = 1 + Q_2.numP$ \newline \texttt{\{AUX -= 3\}} \\ \hline
-35 & $Q \to \lambda$ & $Q.param = \texttt{void}, Q.numP = 0$ \hspace{1cm} \texttt{\{AUX -= 0\}} \\ \hline
-
-% Regla 38, 39 (IF)
-38, 39 & $B \to \texttt{if} \; ( \; E \; ) \; Z$ & 
-$B.tipo = \texttt{if}(E.tipo == \texttt{logico}) \texttt{ then tipo\_error}$ \newline
-$B.tipoRet = Z.tipoRet$ \newline
-\texttt{\{AUX -= 5\}} \\ \hline
-
-% Regla 51, 52 (LET)
-51, 52 & $B \to \texttt{let} \; T \; \mathbf{id} \; ;$ & 
-$\texttt{zonaDecl = true}$ \newline
-$\text{añadirTipo}(\mathbf{id}.pos, T.tipo)$ \newline
-$\text{añadirDespl}(\mathbf{id}.pos, despl)$ \newline
-$\text{desplazamiento} += T.\text{tamaño}$ \newline
-$\texttt{zonaDecl = false}$ \newline
-\texttt{\{AUX -= 4\}} \\ \hline
-
-% Regla 58, 59, 60 (Function)
-58-60 & $F \to \texttt{function} \; H \; \mathbf{id} \; ( \; A \; ) \; \{ \; C \; \}$ & 
-$\texttt{zonaDecl = true}, \text{añadeTipo}(\mathbf{id}.pos, \texttt{tipo\_func})$ \newline
-$\text{añadeTipoRet}(\mathbf{id}.pos, H.tipo), C.tipoRet = H.tipo$ \newline
-$\text{añadeEtiq}(\mathbf{id}.pos, \text{nuevaEtiq}())$ \newline
-$TSF = \text{crearTabla}(), \text{despl} = 0, \texttt{zonaDecl = false}$ \newline
-$\text{añadeParam}(\mathbf{id}.pos, A.param), \text{liberarTabla}(TSF)$ \newline
-\texttt{\{AUX -= 9\}} \\ \hline
-
-% Regla 68, 69 (Programa Principal)
-68, 69 & $PP \to P$ & 
-$TS = \text{crearTabla}(), \text{desplazamiento} = 0$ \newline
-$\text{liberarTabla}(TS)$ \newline
-\texttt{\{AUX -= 1\}} \\ \hline
-
-\end{longtable}
-
-\newpage
-\subsection{Errores}
-Para los errores hemos tenido en cuenta:
-
-\begin{itemize}
-    \item El uso de tipos correctos en expresiones como and o >
-    \item La no conversión de tipo en operaciones
-    \item La utilización de llamadas a funciones con el número y el tipo correctos de los parámetros\
-    \item La asignación de variables con datos del mismo tipo
-    \item Utilización de write y read con variables de tipo entero, real o cadena
-    \item El tipo devuelto en funciones
-    \item Que las sentencias de comprobación del if sean de tipo lógico
-\end{itemize}
-\newpage
-
-\section{Diseño de la tabla de símbolos}
-En la tabla de símbolos hemos utilizado la busqueda lineal para recorrer las tablas.
-
-Hemos diferenciado las posiciones de la tabla de símbolos global de las de la función denotando las posiciones de la tabla de función negativas y haciendo que la primera
-posición de cada tabla sea 1 y -1 respectivamente.
 \newpage
 
 \section{Diseño del gestor de errores}
