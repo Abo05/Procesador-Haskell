@@ -7,6 +7,7 @@ import GErrores    (GError, registrarErrorAsin, CodErr (..))
 import Alex        (getToken)
 import TablaSimbolos (TablaSimbolos, lexema)
 import System.IO   (Handle, hPutStr, hPutStrLn)
+import Reglas       (numReglaInt)
 
 -- Pila inicial: [Axioma P, Dollar]
 pilaInicial :: [Simbolo]
@@ -100,7 +101,7 @@ bucleAsin input ge ts hTok hTS hParse (NoTerminal nt : resto) tok =
 
         Just (Regla n cons) -> do
             -- Escribimos el número de la regla
-            hPutStr hParse (show n ++ " ")
+            hPutStr hParse (show (numReglaInt n) ++ " ")
             -- Añadimos el consecuente en orden inverso
             let pilaNueva = cons ++ resto
             --putStrLn ("Pila:" ++ show pilaNueva)

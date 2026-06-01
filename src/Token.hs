@@ -53,6 +53,8 @@ identificadorACode "function"   = Just TkFunction
 identificadorACode "read"       = Just TkRead
 identificadorACode "write"      = Just TkWrite
 identificadorACode "return"     = Just TkReturn
+identificadorACode "true"       = Just TkTrue
+identificadorACode "false"      = Just TkFalse
 identificadorACode _            = Nothing
 
 -- Formato <Codigo,Atributo> para el fichero de tokens
