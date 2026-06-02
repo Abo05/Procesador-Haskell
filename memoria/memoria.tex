@@ -112,6 +112,47 @@ Un procesador se puede dividir principalmente en los siguientes módulos interco
 El desarrollo de esta práctica se centra en la implementación de un procesador utilizando el paradigma de programación funcional, concretamente mediante el lenguaje \textit{Haskell} dado en la asignatura. El objetivo principal es construir las fases iniciales descritas anteriormente: análisis léxico y sintáctico; haciendo especial hincapié en el modelado modular.\\
 Se querría haber desarrollado también el analizador semántico sin embargo, debido al tiempo dado para hacer la práctica y su coincidencia con otros trabajos y exámenes nos ha sido imposible terminar la realización de dicho módulo. No obstante, gracias al diseño estrictamente modular empleado en la arquitectura del sistema, se deja la estructura totalmente preparada y abierta para la incorporación futura de esta fase de análisis sin necesidad de reestructurar el núcleo del procesador ya desarrollado.
 
+\subsection{Características del lenguaje}
+
+Se ha decido que el procesador realizado se encargará de procesar un lenguaje inventado basado en JavaScript, que tiene carácteristicas simplificadas para poder hacer la práctica. En la realidad el lenguaje sería más complejo aunque, esto sólo sopondría añadir más estados a los autómatas hechos ya que, la lógica subyacente sería la misma.
+
+\begin{description}
+    \item[Generalidades y formato:] el lenguaje implementado es \textit{case-sensitive}, esto es que distingue entre mayúsculas y minúsculas; en el que los espacios en blanco, tabulaciones y saltos de línea se tratan como separadores ignorados por el analizador. Las sentencias simples y las declaraciones explícitas finalizan obligatoriamente con un punto y coma (\texttt{;}). El lenguaje admite comentarios de línea mediante el uso del doble operador de división (\texttt{//}).
+    
+    \item[Estructura de bloques y ámbito:] El lenguaje presenta una estructura de bloques delimitados por llaves (\texttt{\{} y \texttt{\}}). Maneja los conceptos de:
+    \begin{itemize}
+        \item \textbf{Ámbito global:} Identificadores declarados fuera de cualquier función o variables utilizadas de forma implícita (sin declaración previa), las cuales se asumen por defecto como globales y de tipo entero (\texttt{int}).
+        \item \textbf{Ámbito local:} Variables declaradas explícitamente mediante la palabra clave \texttt{let} en el interior de una función, siendo visibles únicamente desde su declaración hasta el cierre de la misma. No se permite la definición de funciones anidadas.
+    \end{itemize}
+
+    \item[Tipos de datos y constantes:] Se da soporte a los siguientes tipos de datos básicos, sin existencia de conversiones automáticas de tipo implícitas:
+    \begin{itemize}
+        \item \textbf{Entero (\texttt{int}):} Representa valores numéricos de 16 bits con signo (rango hasta 32767).
+        \item \textbf{Real (\texttt{float}):} Valores numéricos de 32 bits con signo. Su representación requiere obligatoriamente al menos un dígito antes y después del punto decimal (ej. \texttt{3.0}).
+        \item \textbf{Cadena (\texttt{string}):} Secuencias de caracteres delimitadas por comillas. Ocupan un tamaño fijo en memoria y soportan hasta un máximo de 64 caracteres.
+        \item \textbf{Lógico (\texttt{boolean}):} Representado mediante las constantes reservadas \texttt{true} y \texttt{false}.
+        \item \textbf{Vacío (\texttt{void}):} Utilizado exclusivamente para denotar la ausencia de tipo de retorno o de parámetros en las funciones.
+    \end{itemize}
+
+    \item[Operadores y precedencia:] El sistema modela un conjunto cerrado de operadores agrupados por su funcionalidad (de menor a mayor precedencia):
+    \begin{enumerate}
+        \item Asignación simple (\texttt{=}).
+        \item Operador lógico AND (\texttt{\&\&}).
+        \item Operadores relacionales de comparación: mayor (\texttt{>}) y mayor o igual (\texttt{>=}).
+        \item Operadores aritméticos binarios: suma (\texttt{+}) y resta (\texttt{-}).
+        \item Operadores unarios de alta precedencia: negación lógica (\texttt{!}), autodecremento (\texttt{--}), así como el signo más (\texttt{+}) y menos (\texttt{-}) unarios.
+    \end{enumerate}
+    Se permite la utilización de paréntesis de apertura y cierre para alterar el orden natural de evaluación de las expresiones.
+
+    \item[Sentencias del lenguaje:] Además de las expresiones de asignación, el flujo de ejecución se compone de:
+    \begin{itemize}
+        \item \textbf{Instrucciones de Entrada/Salida:} \texttt{read} (para la lectura de datos por teclado hacia una variable) y \texttt{write} (para la evaluación y salida por pantalla de expresiones).
+        \item \textbf{Estructuras condicionales:} Sentencias de control \texttt{if} (sencilla) e \texttt{if-else} (compuesta) para la bifurcación del flujo lógico orientada a bloques. Cabe destacar que este dialecto prescinde de bucles iterativos.
+    \end{itemize}
+
+    \item[Funciones y recursividad:] Las funciones se declaran mediante la palabra clave \texttt{function} y deben definirse en el ámbito global antes de ser invocadas. El paso de parámetros se realiza estrictamente por valor y se garantiza soporte completo para la recursividad, permitiendo que una función se invoque a sí misma. El retorno de valores se gestiona explícitamente mediante la sentencia \texttt{return}.
+\end{description}
+
 \section{Diseño del analizador léxico}
 
 \subsection{Tokens}
