@@ -9,6 +9,7 @@ import Asin (parsear)
 
 -- Pasamos de un fichero a un string con el contenido del fichero
 -- Esta función es lazy, luego convierte el fichero según sea necesario
+-- El nombre del fichero a analizar se pasa como parámetro y se lee en args
 main :: IO ()
 main = do
     args <- getArgs
@@ -23,23 +24,22 @@ main = do
     hTS     <- openFile "output/TablaSimbolos.txt"  WriteMode
     hParse  <- openFile "output/Parse.txt"          WriteMode
 
-    --TODO: Esto ahora vale, pero cuando haya más tablas no se.
-    --Se me ocurre escribir la tabla principal en este fichero, las demás
-    --en otro fichero, cuando se acaba el programa, se imprimen ambas.
-    --Así se mantiene el orden.
     -- Cabecera de la tabla de símbolos
     hPutStrLn hTS "CONTENIDO DE LA TABLA # 1 :"
 
+    --Inicializamos el gestor de errores y la tabla de símbolos
     let ge0 = gErrorInicial
         ts0 = tablaInicial
 
-    --Recorre todo el fichero
+    --Recorre todo el fichero y devuelve el gestor de errores resultante
     geFinal <- parsear fichero ge0 ts0 hTok hTS hParse
 
+    --Cerramos los ficheros de salida
     hClose hTok
     hClose hTS
     hClose hParse
 
+    --Si hay errores, los imprimimos por la salida estandar
     if hayErrores geFinal
         then do
             hPutStrLn stderr "\n=== ERRORES ==="

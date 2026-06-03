@@ -19,7 +19,8 @@ maxCadena = 64
 
 -- Tiene las estructuras necesarias y el token devuelto.
 -- Además, True si se ha insertado un léxema en la tabla de símbolos
--- No nos vale con token, pues tenemos que ver si el identificador es nuevo o no
+-- No nos vale con ver que el token es TkIdentificador, 
+-- pues tenemos que ver si el identificador es nuevo o no
 type TsMod = Bool
 type Resultado = (Maybe Token, String, GError, TablaSimbolos, TsMod)
 
@@ -97,6 +98,7 @@ estadoPuntoDec (c:cs) ge ts ne
 
 ------------------------------------------------------
 
+-- Recibe además, la parte entera, la parte decimal y el número de decimales del número
 estadoReal :: String -> GError -> TablaSimbolos -> Int -> Float -> Int -> Resultado
 estadoReal [] ge ts ne dec ndec =
     let (tok, ge') = genReal ge ne dec ndec

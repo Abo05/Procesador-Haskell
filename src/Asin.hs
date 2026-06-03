@@ -23,6 +23,7 @@ insertadoEnTs (TkIdentificador pos) True ts hTS = do
 
 -- El return es porque es una función que escribe en un fichero, luego necesita
 -- devolver un IO, devolvemos el vacio siempre
+-- Este caso es por si no queremos escribir en la tabla
 insertadoEnTs _ _ _ _ = return () 
 
 
@@ -58,7 +59,6 @@ bucleAsin :: String -> GError -> TablaSimbolos
 bucleAsin _ ge _ _ _ _ [] tok = do
     case tok of
         --Recordamos que return no devuelve, si no que lo convierte en monada IO
-        --TODO:Que código de error poner
         TkEof -> return ge
         _     -> return (registrarErrorAsin ErrTerminal
                     "El fichero contiene código tras el final esperado" ge)
@@ -71,6 +71,7 @@ bucleAsin input ge ts hTok hTS hParse (Terminal cima : resto) tok =
             -- Consumimos el token, pedimos el siguiente
             let (tok', input', ge', ts', insertado) = getToken input ge ts
             case tok' of
+                --Error léxico, borramos la pila y volvemos a empezar el analizador sintáctico
                 Nothing -> parsear input' ge' ts' hTok hTS hParse
 
                 Just tokSig -> do
@@ -104,7 +105,6 @@ bucleAsin input ge ts hTok hTS hParse (NoTerminal nt : resto) tok =
             hPutStr hParse (show (numReglaInt n) ++ " ")
             -- Añadimos el consecuente en orden inverso
             let pilaNueva = cons ++ resto
-            --putStrLn ("Pila:" ++ show pilaNueva)
             bucleAsin input ge ts hTok hTS hParse pilaNueva tok
 
 

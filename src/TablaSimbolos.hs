@@ -1,5 +1,6 @@
 module TablaSimbolos where
 
+--La tabla de símbolos son un conjunto de string, cada string siendo una fila
 newtype TablaSimbolos = TS [String] deriving Show
 
 tablaInicial :: TablaSimbolos
@@ -10,9 +11,9 @@ tablaInicial = TS []
 -- Si no existe lo inserta al final y devuelve la nueva posición
 -- La tabla de simbolos no imprime en el fichero tablasímbolos, complicaría las cosas
 insertarOBuscar :: String -> TablaSimbolos -> (Int, TablaSimbolos, Bool)
-insertarOBuscar iLexema ts@(TS lista) =
-    case buscar iLexema ts of
-        Just pos -> (pos, ts, False)
+insertarOBuscar iLexema (TS lista) =
+    case buscar iLexema (TS lista) of
+        Just pos -> (pos, (TS lista), False)
         Nothing  ->
             let pos = length lista
             in (pos, TS (lista ++ [iLexema]), True)

@@ -11,6 +11,7 @@ data Regla = Regla
     } deriving (Show)
 
 -- La tabla: dado un no terminal y el token actual, devuelve la regla o Nothin(Error)
+-- La notación con $ nos ahorra el uso de paréntesis
 tablaLL :: NoTerminal -> Token -> Maybe Regla
 
 --   A 

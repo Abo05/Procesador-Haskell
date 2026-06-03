@@ -15,7 +15,6 @@ data NoTerminal
     | P | Q | R | R1 | S | T | U | U1 | V | W | X | Y | Z
     deriving (Show, Eq, Ord, Enum, Bounded)
 
---TODO:Son los que teníamos en el otro pdl
 -- Para los mensajes de error de no terminales
 msgErrorNoTerminal :: NoTerminal -> String
 msgErrorNoTerminal A  = "Se esperaba leer los parámetros de la función"

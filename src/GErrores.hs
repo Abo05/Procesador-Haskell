@@ -1,22 +1,23 @@
 module GErrores where
 
--- TODO: Esto investigarlo, pero investigar más
+--Guardamos la línea acutal del fichero y los errores encontrados
 data GError = GError
     { linea :: Int
     , errores :: [Error]
     } deriving (Show)
 
+--Guardamos la línea del error, el código de error y su mensaje
 data Error = Error
     { errLinea :: Int
     , errCodigo :: CodErr
     , errMensaje :: String
     } deriving (Eq)
 
---TODO: ver si es menjor cambiar a Text
---al hacer el "struct", se crean los getters automaticamente
+--Se crean los getters automaticamente al crear el data
 instance Show Error where
     show e = "error en la línea " ++ show(errLinea e) ++ ": " ++ errMensaje e
 
+--Inicializamos el gestor de errores en la línea 1 y sin errores
 gErrorInicial :: GError
 gErrorInicial = GError
     { linea     = 1
@@ -29,7 +30,7 @@ nuevaLinea ge = ge
     { linea     = linea ge + 1
     }
 
--- Cada vez crea una nueva variable de GErrores
+-- Cada vez crea una nueva variable de GErrores para añadir el error
 registrarError :: CodErr -> GError -> GError
 registrarError cod ge =
         let err = Error
@@ -39,7 +40,6 @@ registrarError cod ge =
                 }
         in ge { errores = err : errores ge }
 
---TODO:Este solo lo tengo en Asin, el de arriba solo en Alex, unificar o cambiar el nombre del de arriba
 registrarErrorAsin :: CodErr -> String -> GError -> GError
 registrarErrorAsin cod msg ge = let err = Error
                                             { errLinea    = linea ge
@@ -53,7 +53,7 @@ hayErrores ge = not (null(errores ge))
 
 -- Los errores se acumularon en orden inverso
 listarErrores :: GError -> [Error]
-listarErrores = reverse . errores
+listarErrores ge = reverse (errores ge)
 
 data CodErr 
              = ErrCarNoEsp
@@ -73,7 +73,6 @@ data CodErr
              | ErrTerminal
              deriving Eq
 
--- El número tiene que ver con el estado en el que me encuentro
 mensajeError :: CodErr -> String
 mensajeError ErrCarNoEsp  = "carácter no esperado"
 mensajeError ErrNoDec     = "número real con parte decimal faltante"
@@ -88,5 +87,5 @@ mensajeError ErrMaxReal   = "valor real excede el máximo permitido"
 mensajeError ErrMaxCad    = "cadena excede el número máximo de caracteres"
 mensajeError ErrNumInv    = "carácter inesperado después de número"
 mensajeError ErrIdInv     = "identificador con carácter no válido"
--- mensajeError _  = "error desconocido"
--- TODO: Ver si tiene sentido esa línea
+mensajeError _            = "este error no debería salir. El sintáctico llamó a esta función"
+
