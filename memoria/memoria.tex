@@ -54,7 +54,7 @@
 
 \title{MEMORIA CUARTA PRACTICA:\\ PROCESADOR DE LENGUAJE EN HASKELL}
 \date{\today}
-\author{Acedo Blanco, Alvaro \\ Czepiel, Daniel}
+\author{Acedo Blanco, Alvaro \\ Czepiel Babiarz, Daniel}
 
 \begin{document}
 
@@ -195,6 +195,21 @@ data Simbolo
 \end{lstlisting}
 
 Gracias a esta estructura, el compilador de Haskell, mediante alertas de advertencia (\textit{exhaustiveness checking}), nos obliga a cubrir todos los casos posibles al procesar símbolos, previniendo errores en tiempo de ejecución.
+
+\subsection{Uso de la librería \texttt{System.IO}}
+La interacción con el sistema de archivos del sistema operativo se delega en las funciones de la librería estándar \texttt{System.IO}. Se utilizan manejadores de archivos (\texttt{Handle}) y modos de apertura explícitos (\texttt{WriteMode}) para volcar la información de forma estructurada en tres canales independientes:
+\begin{itemize}
+    \item \texttt{output/Tokens.txt}: El registro secuencial de los componentes léxicos procesados.
+    \item \texttt{output/TablaSimbolos.txt}: El volcado estático de las variables e identificadores únicos.
+    \item \texttt{output/Parse.txt}: El conjunto ordenado de índices de reglas que componen la derivación sintáctica.
+\end{itemize}
+
+\subsection{Procesamiento de flujos mediante Entrada/Salida perezosa}
+Una de las decisiones de diseño más relevantes del proyecto radica en la carga del fichero fuente a través de la función \texttt{readFile}. En lenguajes imperativos tradicionales como C, la lectura de un fichero suele requerir la asignación previa de un \textit{buffer} de memoria del tamaño total del archivo o bucles iterativos que bloquean el hilo de ejecución de forma activa.
+
+En este procesador, gracias a la \textbf{evaluación perezosa} (\textit{lazy}) intrínseca de Haskell, \texttt{readFile} no vuelca de golpe el contenido total del archivo en la memoria RAM del ordenador. En su lugar, transforma el archivo en una cadena de caracteres (\texttt{String}) evaluada de manera incremental. 
+
+A medida que el analizador léxico (\texttt{Alex.hs}) demanda nuevos caracteres para transicionar en el autómata y agrupar el siguiente token, el sistema operativo lee físicamente del disco solo los bytes estrictamente necesarios. Este comportamiento permite que el procesador mantenga un consumo de memoria mínimo y constante, independientemente de la longitud del código fuente a compilar, aislando la lógica del compilador de la gestión manual de flujos de E/S.
 
 \newpage
 
@@ -513,9 +528,11 @@ Tras actualizar el estado, en lugar de arrastrar un árbol sintáctico corrupto,
 \newpage
 
 \section{Diseño del gestor de errores}
-Para el gestor de errores hemos decidido hacer recuperación de errores, así el gestor recopila los errores del archivo entero y luego los vuelca una vez terminado de analizar el fichero entero.
+Durante los anterirores apartados ya se ha hablado de los errores que se detectan y que mensaje de error se saca en estos casos, por lo tanto, esta sección se va a mencionar ligeramente parte de la implemetación.
 
-Para el contéo del número de línea, creamos una función la cual el analizador léxico llama cada vez que lee el delimitador salto de línea.
+Para el gestor de errores hemos decidido hacer recuperación de errores, así el gestor recopila los errores del archivo entero y luego los vuelca una vez terminado de analizar el fichero entero. Esto tiene un punto malo y es que si bien se detectan más errores, una parte de los errores detectados es debido al error anterior, por ejemplo, si tenemos una cadena no cerrada, se va a detectar todo lo que este en su misma línea como parte de la cadena, pudiendo dar un error de que no se finaliza con punto y coma. Esto no es un error de diseño sino una decisión consciente, la mayoría de compiladores y lsp (language servers) modernos actuán así para poder ayudar más al programador con el contra de dar más falsos errores.
+
+Para el contéo del número de línea, creamos una función la cual el analizador léxico llama cada vez que lee el delimitador salto de línea. Además, como se ha decidido hacer una implementación que fuera lo más funcional posible, el gestor de errores no es una estructura mutable sino, que cada vez que se actualiza se pasa una copia con el nuevo error o la línea actual actualizada.
 
 \newpage
 
