@@ -14,7 +14,7 @@ El repositorio está organizado como un paquete estándar de Cabal:
   * `Token.hs` y `Simbolos.hs`: Data Type's del modelo de datos.
   * `GErrores.hs`: Gestor de errores.
   * `TablaSimbolos.hs`: Estructura para el registro de variables y funciones.
-* **`input/`**: Directorio pensado para alojar los archivos de código fuente a compilar
+* **`input/`**: Directorio donde hay unos pocos ficheros de prueba, se ha pensado para dejar ahí los ficheros a pasar para una mejor orgamización
 * **`output/`**: Directorio donde el procesador generará los resultados del análisis (`Tokens.txt`, `TablaSimbolos.txt`, `Parse.txt`).
 * **`memoria/`**: Documentación técnica detallada del proyecto (LaTeX y PDF).
 

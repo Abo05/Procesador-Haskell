@@ -1,0 +1,14 @@
+// Error léxico: supera el límite maxEntero (32767)
+let int limiteEntero = 40000;
+
+// Error léxico: supera el límite maxCadena (64 caracteres)
+let string textoLargo = "Esta es una cadena extremadamente larga que supera de forma intencionada el limite de sesenta y cuatro caracteres establecido en el modulo del analizador";
+
+// Error léxico: contiene un tabulador real dentro de la cadena (se asume que hay un TAB entre Hola y Mundo)
+let string conTabulador = "Hola	Mundo";
+
+// Error léxico: secuencia de escape no válida (\z)
+let string escapeInvalido = "Prueba \z fallo";
+
+// Error léxico: identificador inválido o carácter inesperado después de número
+let int idInvalido = 123abc;

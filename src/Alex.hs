@@ -79,7 +79,7 @@ estadoNum (c:cs) ge ts ne
     | isAlpha c      = (Nothing, getNextNoAlfa (c:cs), (registrarError ErrNumInv ge), ts, False)
     | otherwise      = 
                     let (tok, ge') = genEntero ge ne
-                    in (tok, cs, ge', ts, False)
+                    in (tok, (c:cs), ge', ts, False)
 
 genEntero :: GError -> Int -> (Maybe Token, GError)
 genEntero ge ne

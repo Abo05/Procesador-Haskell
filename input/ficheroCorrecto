@@ -1,0 +1,17 @@
+let int a;
+let float b;
+let string saludo;
+
+a = 10;
+b = 3.14;
+saludo = "Hola mundo";
+
+function int sumar(int x, int y) {
+    return x + y;
+}
+
+if (a > 5) {
+    write sumar(a, 20);
+} else {
+    read a;
+}

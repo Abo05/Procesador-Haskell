@@ -1,4 +1,0 @@
-let int a;
-if(a>true)
-    write a;
-return b;

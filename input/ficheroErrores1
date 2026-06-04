@@ -1,0 +1,13 @@
+// Error léxico: operador and incompleto (& en lugar de &&) y carácter desconocido (@)
+let int a & b @;
+
+// Error léxico: cadena sin cerrar antes del salto de línea
+let string c = "esta cadena no se cierra
+
+// Error sintáctico: el bloque if carece de paréntesis y las sentencias no tienen punto y coma
+if a > 2 {
+    b = 5
+}
+
+// Error léxico: número real con parte decimal faltante
+let float d = 4.;

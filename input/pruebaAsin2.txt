@@ -1,8 +1,0 @@
-function int hola(int hola, float a){
-    if(hola)
-        return a;
-}
-
-let int b;
-read b;
-write b;
