@@ -6,14 +6,86 @@ import Token (Token(..))
 data Simbolo
     = Terminal Token
     | NoTerminal NoTerminal
+    | Accion Accion
     | Dollar    --Es el símbolo de final de pila
     deriving (Show, Eq)
 
 --No terminales de la gramática
 data NoTerminal
     = A | B | C | D | E | E1 | F | G | H | I | K | L | O
-    | P | Q | R | R1 | S | T | U | U1 | V | W | X | Y | Z
+    | P | PP | Q | R | R1 | S | T | U | U1 | V | W | X | Y | Z
     deriving (Show, Eq, Ord, Enum, Bounded)
+
+data Accion
+    = AccER             -- {E.tipo = if(E1.tipo = void || R.tipo = E1.tipo) then R.tipo else tipo_error}
+    | AccE1And          -- {E1.tipo = if(R.tipo = logico && E1_1.tipo € {logico, void}) then R.tipo else tipo_error}
+    | AccE1Void         -- {E1.tipo = void} 
+    | AccRU             -- {R.tipo = if(R1.tipo = void) then U.tipo else if(U.tipo = R1.tipo}) logico else tipo_error}
+    | AccR1M            -- {U.tipo∈{real, entero} && R1_2 = void then U.tipo else tipo_error}
+    | AccR1MI           -- {U.tipo∈{real, entero} && R1_2 = void then U.tipo else tipo_error}
+    | AccR1Void         -- {R1.tipo = void}
+    | AccUV             -- {U.tipo = if(U1.tipo = void || V.tipo = U1.tipo) then V.tipo else tipo_error} 
+    | AccU1Suma         -- {U1.tipo = if(V.tipo € {entero, real} && U1_1.tipo = void || V.tipo = U1_1.tipo) then V.tipo else tipo_error}
+    | AccU1Resta        -- {U1.tipo = if(V.tipo € {entero, real} && U1_1.tipo = void || V.tipo = U1_1.tipo) then V.tipo else tipo_error}
+    | AccU1Void         -- {U1.tipo = void}
+    | AccMasW           -- {V.tipo = if(W.tipo € {entero, real}) then W.tipo else tipo_error}
+    | AccMenosW         -- {V.tipo = if(W.tipo € {entero, real}) then W.tipo else tipo_error}
+    | AccNotW           -- {V.tipo = if(W.tipo = lógico) then tipo_logico else tipo_error}{AUX-=2}
+    | AccVDec           -- {V.tipo = if(buscarTipo(id.pos) € {real, entero}) then buscarTipo(id.pos) else tipo_error }
+    | AccVW             -- {V.tipo = W.tipo}
+    | AccWId            -- {W.tipo = if(O.tipo = void) then buscarTipo(id.pos) else if buscarParametros(id.pos) = O.parametros then buscarTipoRet(id.pos) else tipo_error}
+    | AccWTipo          -- {W.tipo = E.tipo}
+    | AccWInt           -- {W.tipo = entero}
+    | AccWFloat         -- {W.tipo = real}
+    | AccWString        -- {W.tipo = cadena}
+    | AccWBool           -- {W.tipo = lógico}
+    | AccOParam         -- {O.tipo = tipo_funcion, O.parametros = L.parametros, O.numParametros = L.numeroParametros}
+    | AccOVoid          -- {O.tipo = void}
+    | AccSId            -- {S.tipo = if(bucarTipo(id.pos) = G.tipo = tipo_funcion) then if(buscarParametros(id.pos) != G.parametros) tipo_error else if buscarTipo(id.pos) != G.tipo) then tipo_error}
+    | AccSWrite         -- {S.tipo = if (E.tipo !€ {entero, real, cadena) then tipo_error, S.tipoRet = void} 
+    | AccSRead          -- {S.tipo = if(buscarTipoTS(id.pos) !€ {entero, real, cadena)) then tipo_error, S.tipoRet = void}
+    | AccSReturn        -- {S.tipo = if(X.tipo != S.tipoRet) then tipo_error}
+    | AccGAsig          -- {G.tipo = E.tipo}
+    | AccGParam         -- {G.tipo = tipo_funcion, G.parametros = L.parametros, G.numParametros = L.numParametros}
+    | AccLParam         -- {L.parametros = E.tipo x Q.parametros L.numParametros = 1 + Q.numParametros}
+    | AccLVoid          -- {L.parametros = void, L.numParametros=0}
+    | AccQParam         -- {Q_1.parametros = E.tipo x Q_2.parametros, Q_1.numParametros = 1 + Q_2.numParametros}
+    | AccQVoid          -- {Q.parametros = void, Q.numParametros = 0}
+    | AccXTipo          -- {X.tipo = E.tipo}
+    | AccXVoid          -- {X.tipo = tipo_void}
+    | AccBIf            -- {B.tipo = if(E.tipo != lógico) then tipo_error, Z.tipoRet = B.tipoRet}
+    | AccDec5           -- {AUX-=5}
+    | AccZS             -- {S.tipoRet = Z.tipoRet}
+    | AccDec1           -- {AUX-=1}
+    | AccZBloqueRet     -- {C.tipoRet = Z.tipoRet, I.tipoRet = Z.tipoRet}
+    | AccDec4           -- {AUX-=4}
+    | AccITipoRet       -- {D.tipoRet = I.tipoRet}
+    | AccDec2           -- {AUX-=2}
+    | AccDIf            -- {D.tipo = if(E.tipo != lógico) then tipo_error, C.tipoRet = D.tipoRet, I.tipoRet = D.tipoRet}
+    | AccDec8           -- {AUX-=8}
+    | AccDTipoRet       -- {C.tipoRet = D.tipoRet}
+    | AccDec3           -- {AUX-=3}
+    | AccZonaDecl       -- {zonaDecl=True}
+    | AccBLet           -- {añadirTipo,añadirDespl,desplazamiento+=T.tam, zonaDecl = false}
+    | AccBTipoRet       -- {S.tipoDevuelto = B.tipoDevuelto}
+    | AccTInt           -- {T.tipo = entero, T.tamaño = 2}
+    | AccTFloat         -- {T.tipo = real, T.tamaño = 4}
+    | AccTBool          -- {T.tipo = logico, T.tamaño = 1}
+    | AccTString        -- {T.tipo = cadena, T.tamaño = 64}
+    | AccFCrearTabla    -- {añadeTipo(id.pos, tipo_funcion), añadeTipoRet(id.pos, H.tipo), C.tipoRet = H.tipo , añadeEtiq(id.pos, nuevaEtiq())),TSF = crearTabla(), desplazamiento = 0}
+    | AccFParamA        -- {zonaDecl = false, añadeParametros(id.pos,A.parametros), añadeNumParametros(id.pos,A.numParametros)}
+    | AccFLibTabla      -- {liberarTabla(TSF)} {AUX-=9}
+    | AccHTipoT         -- {H.tipo = T.tipo} {AUX-=1}
+    | AccHVoid          -- {H.tipo = void}{AUX-=1}
+    | AccAIdTipo        -- {id.tipo = T.tipo...}
+    | AccAParamK        -- {A.parametros = T.tipo x K.parametros, A.numP = 1 + K.numP}{AUX-=3}
+    | AccAVoid          -- {A.numP = 0, A.parametros = NULL}{AUX-=1}
+    | AccKParam         -- {K1.parametros = T.tipo x K2.parametros, K1.numP = 1 + K2.numP}{AUX-=4}
+    | AccKVoid          -- {k.parametros = NULL, K.numP = 0}
+    | AccCTipoRet       -- {B.tipoRet = C_1.tipoRet, C_2.tipoRet = C_1.tipoRet} B C_2}{AUX-=2}
+    | AccCrearTabla     -- {TS = crearTabla(), desplazamiento = 0}
+    | AccLibTabla       -- {liberarTabla(TS)}{AUX-=1}
+    deriving (Show, Eq)
 
 -- Para los mensajes de error de no terminales
 msgErrorNoTerminal :: NoTerminal -> String
@@ -79,4 +151,4 @@ msgErrorTerminal TkRead              = "la palabra reservada read"
 msgErrorTerminal TkReturn            = "la palabra reservada return"
 msgErrorTerminal TkWrite             = "la palabra reservada write"
 msgErrorTerminal TkEof               = "fin de fichero"
-
+                    

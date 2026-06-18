@@ -1,0 +1,254 @@
+Producciones = {
+{1}E -> R E1 {E.tipo = if(E1.tipo = void || R.tipo = E1.tipo) then R.tipo else tipo_error}          ////Regla 1
+             {AUX-=2}
+
+{2}E1 -> && R E1_1  {E1.tipo = if(R.tipo = logico && E1_1.tipo € {logico, void}) then R.tipo else tipo_error}     ////Regla 2
+             {AUX-=3}
+
+{3}E1 -> lambda {E1.tipo = void}
+             {AUX-=0}
+
+{4}R -> U R1 {R.tipo = if(R1.tipo = void) then U.tipo 
+            else if(U.tipo = R1.tipo}) logico  //Creo que no hace falta comprobar U.tipo porque ya va implicito: R1.tipo solo puede ser void, entero o real
+            else tipo_error} 
+             {AUX-=2}
+
+//TODO: Se pueden concatenar comparaciones? (3>2>1)
+//Si, el compilador mete parentesis de izquierda a derecha
+//Pero claro, 3>2->true; true>1???
+//La respuesta es que a nivel sintactico se puede hacer, pero a semantico no se puede
+//El error que dará no será por ser una secuenca no valida sino por tipos
+{5}R1_1 -> > U R1_2 {U.tipo∈{real, entero} && R1_2 = void then U.tipo 
+            else tipo_error} 
+             {AUX-=3}
+
+{6}R1_1 -> >= U R1_2 {U.tipo∈{real, entero} && R1_2 = void then U.tipo 
+            else tipo_error}
+             {AUX-=3}
+
+{7}R1 -> lambda {R1.tipo = void}
+             {AUX-=0}
+
+{8}U -> V U1 {U.tipo = if(U1.tipo = void || V.tipo = U1.tipo) then V.tipo else tipo_error} 
+             {AUX-=2}
+
+{9}U1 -> + V U1_1 {U1.tipo = if(V.tipo € {entero, real} && U1_1.tipo = void || V.tipo = U1_1.tipo) 
+                            then V.tipo else tipo_error} 
+             {AUX-=3}
+
+{10}U1 -> - V U1_1 {U1.tipo = if(V.tipo € {entero, real} && U1_1.tipo = void || V.tipo = U1_1.tipo) 
+                            then V.tipo else tipo_error}         ////Regla 10
+             {AUX-=3}
+
+{11}U1 -> lambda {U1.tipo = void}
+             {AUX-=0}
+
+{12}V -> + W {V.tipo = if(W.tipo € {entero, real}) then W.tipo
+                                else tipo_error}
+             {AUX-=2}
+
+{13}V -> - W {V.tipo = if(W.tipo € {entero, real}) then W.tipo
+                                else tipo_error}
+             {AUX-=2}
+
+{14}V -> ! W {V.tipo = if(W.tipo = lógico) then tipo_logico
+                            else tipo_error}
+             {AUX-=2}
+
+{15}V -> -- id {V.tipo = if(buscarTipo(id.pos) € {real, entero}) then buscarTipo(id.pos) else tipo_error }            ////Regla 15
+             {AUX-=2}
+
+{16}V -> W {V.tipo = W.tipo}
+             {AUX-=1}
+
+{17}W -> id O {W.tipo = if(O.tipo = void) then buscarTipo(id.pos) 
+                else if buscarParametros(id.pos) = O.parametros
+                    then buscarTipoRet(id.pos)
+                else tipo_error}
+             {AUX-=2}
+
+{18}W -> ( E ) {W.tipo = E.tipo}
+             {AUX-=3}
+
+{19}W -> entero {W.tipo = entero}   
+             {AUX-=1}
+
+{20}W -> real {W.tipo = real}             ////Regla 20
+             {AUX-=1}
+
+{21}W -> cadena {W.tipo = cadena}   
+             {AUX-=1}
+
+{22}W -> true {W.tipo = lógico}   
+             {AUX-=1}
+
+{23}W -> false {W.tipo = lógico}   
+             {AUX-=1}
+
+//O.tipo = tipo_funcion para distinguir llamadas de función
+{24}O -> ( L ) {O.tipo = tipo_funcion, O.parametros = L.parametros, O.numParametros = L.numeroParametros}
+             {AUX-=3}
+
+{25}O -> lambda {O.tipo = void}         ////Regla 25
+             {AUX-=0}
+
+
+//TODO
+{26}S -> id G ;{S.tipo = if(bucarTipo(id.pos) = G.tipo = tipo_funcion) 
+                            then if(buscarParametros(id.pos) != G.parametros)
+                                tipo_error
+                        else if buscarTipo(id.pos) != G.tipo)
+                                then tipo_error}
+             {AUX-=3}
+
+{27}S -> write E ; {S.tipo = if (E.tipo !€ {entero, real, cadena) then tipo_error
+                 , S.tipoRet = void} 
+             {AUX-=3}
+
+{28}S -> read id ; {S.tipo = if(buscarTipoTS(id.pos) !€ {entero, real, cadena)) then tipo_error
+                 , S.tipoRet = void}      
+             {AUX-=3}
+
+{29}S -> return X ; {S.tipo = if(X.tipo != S.tipoRet) then tipo_error}
+             {AUX-=3}
+
+{30}G -> = E {G.tipo = E.tipo}           ////Regla 30 
+             {AUX-=2}
+
+{31}G -> ( L ) {G.tipo = tipo_funcion
+                G.parametros = L.parametros
+                G.numParametros = L.numParametros}
+             {AUX-=3}
+
+//TODO:Es parametros o tipo??Sobretodo en E
+//Si vemos la unica regla que deriva E (Regla 1) vemos que E no tiene parametros solo tipo
+//Ademas esto tiene sentido cuando te das cuenta de que es una operacion asi que solo retorna un tipo, no varios
+{32}L ->  E Q {L.parametros = E.tipo x Q.parametros
+                L.numParametros = 1 + Q.numParametros}
+             {AUX-=2}
+
+{33}L -> lambda {L.parametros = void, L.numParametros=0}
+             {AUX-=0}
+
+{34}Q_1 -> , E Q_2 {Q_1.parametros = E.tipo x Q_2.parametros
+                Q_1.numParametros = 1 + Q_2.numParametros}
+             {AUX-=3}
+
+{35}Q -> lambda {Q.parametros = void, Q.numParametros = 0}         ////Regla 35
+             {AUX-=0}
+
+{36}X -> E {X.tipo = E.tipo}
+             {AUX-=1}
+
+{37}X ->lambda {X.tipo = tipo_void}
+             {AUX-=0}
+
+
+                      +-----------------------------+
+{38, 39}B -> if ( E )  B.tipo = if(E.tipo = logico)         Z
+                             then tipo_error
+                       , Z.tipoRet = B.tipoRet
+                      +-----------------------------+
+             {AUX-=5}
+
+{40, 41}Z -> {S.tipoRet = Z.tipoRet} S 
+             {AUX-=1}
+
+{42, 43}Z -> {C.tipoRet = Z.tipoRet, I.tipoRet = Z.tipoRet} { C } I             ////Regla 40
+             {AUX-=4}
+
+{44, 45}I ->  else {D.tipoRet = I.tipoRet} D 
+             {AUX-=2}
+
+I ->lambda 
+
+//TODO: Índices
+                      +----------------------------------------+
+{47, 48}D -> if ( E ) |D.tipo = if(E.tipo != logico)            |   { C } I
+                      |          then tipo_error
+                      |         C.tipoRet = D.tipoRet 
+                      |         I.tipoRet = D.tipoRet 
+                      +----------------------------------------+
+             {AUX-=8}
+
+//TODO:Índices
+{49, 50}D -> {C.tipoRet = D.tipoRet} { C } 
+             {AUX-=3}
+
+{51,52}
+//TODO:Mirar zonaDecl?
+//Si vuelves a declarar una variable en el mismo ambito??
+                                  +------------------------------+
+B -> let {zonaDecl = true} T id ; |{añadirTipo(id.pos, T.tipo    |
+                                  | , añadirDespl(id.pos, despl) | 
+                                  | , desplazamiento += T.tamaño |        ////Regla 45 
+                                  | , zonaDecl = false           |
+                                  +------------------------------+
+             {AUX-=4}
+
+//TODO:Ver índices de reglas y ver si es necesario preguntar si está en una función
+{53, 41}B -> {S.tipoDevuelto = B.tipoDevuelto} S 
+             {AUX-=1}
+
+{54}T -> int {T.tipo = entero, T.tamaño = 2}
+             {AUX-=1}
+
+{55}T -> float {T.tipo = real, T.tamaño = 4}
+             {AUX-=1}
+
+{56}T -> boolean {T.tipo = logico, T.tamaño = 1}
+             {AUX-=1}
+
+{57}T -> string {T.tipo = cadena, T.tamaño = 64}         ////Regla 50
+             {AUX-=1}
+
+
+{51,58,59,60}
+//TODO:Y si C tiene tipo_error, hacemos algo? Creo que no
+//Y si declaro dos veces la funcion o un parametro???
+//Se supone que puede no haber return
+//Y si hago tipoRet un parametro heredado????????
+F -> function {zonaDecl = true} H id
+    {añadeTipo(id.pos, tipo_funcion), añadeTipoRet(id.pos, H.tipo), C.tipoRet = H.tipo
+    , añadeEtiq(id.pos, nuevaEtiq())),TSF = crearTabla(), desplazamiento = 0} 
+    ( A {zonaDecl = false, añadeParametros(id.pos,A.parametros), añadeNumParametros(id.pos,A.numParametros)}
+    )  { C } {liberarTabla(TSF)}
+             {AUX-=9}
+
+{61}H -> T {H.tipo = T.tipo}
+             {AUX-=1}
+
+{62}H -> void {H.tipo = void}
+             {AUX-=1}
+
+{70, 63}
+A -> T id {id.tipo = T.tipo...} K {A.parametros = T.tipo x K.parametros, A.numP = 1 + K.numP}
+             {AUX-=3}
+
+{64}A -> void {A.numP = 0, A.parametros = NULL}          ////Regla 55
+             {AUX-=1}
+
+{65}K_1 -> , T id {70} K_2 {K1.parametros = T.tipo x K2.parametros, K1.numP = 1 + K2.numP}
+             {AUX-=4}
+
+{66}K -> lambda {k.parametros = NULL, K.numP = 0} 
+             {AUX-=0}
+
+{67, 45}C_1 -> {B.tipoRet = C_1.tipoRet, C_2.tipoRet = C_1.tipoRet} B C_2 
+             {AUX-=2}
+
+C -> lambda 
+             {AUX-=0}
+
+{45}P -> B P             ////Regla 60
+             {AUX-=2}
+
+{45}P -> F P
+             {AUX-=2}
+
+P -> lambda ////IMPORTANTE, creo que el nuestro es mejor poner esto porque hay que hacer la compobacion de que el ultimo es lambda??
+             {AUX-=0}
+
+{68,69}PP -> {TS = crearTabla(), desplazamiento = 0} P {liberarTabla(TS)}
+             {AUX-=1}
+}

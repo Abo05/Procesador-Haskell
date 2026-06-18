@@ -59,7 +59,7 @@ library
     import:           warnings
 
     -- Modules exported by the library.
-    exposed-modules:  Alex,Token,GErrores,TablaSimbolos,Simbolos,TablaLL,Asin,Reglas
+    exposed-modules:  Alex,Token,GErrores,TablaSimbolos,Simbolos,TablaLL,Asin,Reglas,AccionesSem
 
     -- Modules included in this library but not exported.
     -- other-modules:
