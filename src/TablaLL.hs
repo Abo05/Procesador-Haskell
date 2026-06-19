@@ -15,7 +15,7 @@ data Regla = Regla
 tablaLL :: NoTerminal -> Token -> Maybe Regla
 
 --   A 
-tablaLL A TkInt     = Just $ Regla ReglA_TIdK [NoTerminal T, Terminal (TkIdentificador 0),    NoTerminal K]
+tablaLL A TkInt     = Just $ Regla ReglA_TIdK [NoTerminal T, Terminal (TkIdentificador 0), Accion AccAIdTipo, NoTerminal K, Accion AccAParamK]
 tablaLL A TkString  = Just $ Regla ReglA_TIdK [NoTerminal T, Terminal (TkIdentificador 0), Accion AccAIdTipo, NoTerminal K, Accion AccAParamK]
 tablaLL A TkBoolean = Just $ Regla ReglA_TIdK [NoTerminal T, Terminal (TkIdentificador 0), Accion AccAIdTipo, NoTerminal K, Accion AccAParamK]
 tablaLL A TkFloat   = Just $ Regla ReglA_TIdK [NoTerminal T, Terminal (TkIdentificador 0), Accion AccAIdTipo, NoTerminal K, Accion AccAParamK]
@@ -180,15 +180,15 @@ tablaLL S (TkIdentificador _) = Just $ Regla ReglS_IdG
 tablaLL S TkRead   = Just $ Regla ReglS_Read
     [Terminal TkRead, Terminal (TkIdentificador 0), Terminal TkPuntoComa, Accion AccSRead]
 tablaLL S TkReturn = Just $ Regla ReglS_Return
-    [Terminal TkReturn, NoTerminal X, Terminal TkPuntoComa, Accion AccSWrite]
+    [Terminal TkReturn, NoTerminal X, Terminal TkPuntoComa, Accion AccSReturn]
 tablaLL S TkWrite  = Just $ Regla ReglS_Write
-    [Terminal TkWrite, NoTerminal E, Terminal TkPuntoComa, Accion AccSReturn]
+    [Terminal TkWrite, NoTerminal E, Terminal TkPuntoComa, Accion AccSWrite]
 
 --    T
 tablaLL T TkInt     = Just $ Regla ReglT_Int [Terminal TkInt, Accion AccTInt]
-tablaLL T TkString  = Just $ Regla ReglT_String [Terminal TkString, Accion AccTFloat]
+tablaLL T TkString  = Just $ Regla ReglT_String [Terminal TkString, Accion AccTString]
 tablaLL T TkBoolean = Just $ Regla ReglT_Boolean [Terminal TkBoolean, Accion AccTBool]
-tablaLL T TkFloat   = Just $ Regla ReglT_Float [Terminal TkFloat, Accion AccTString]
+tablaLL T TkFloat   = Just $ Regla ReglT_Float [Terminal TkFloat, Accion AccTFloat]
 
 --    U
 tablaLL U tok 

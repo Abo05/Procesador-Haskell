@@ -87,6 +87,43 @@ data Accion
     | AccLibTabla       -- {liberarTabla(TS)}{AUX-=1}
     deriving (Show, Eq)
 
+-- Tipos semánticos posibles
+data TipoSem
+    = TipoEntero
+    | TipoReal
+    | TipoLogico
+    | TipoCadena
+    | TipoVoid
+    | TipoFuncion
+    | TipoError
+    deriving (Show, Eq)
+
+-- Información semántica que puede tener un símbolo en la pila auxiliar
+data InfoSem = InfoSem
+    { tipo           :: TipoSem
+    , tamanio        :: Int           -- tamaño en bytes
+    , tipoDevuelto   :: TipoSem       -- para funciones
+    , parametros     :: [TipoSem]     -- lista de tipos de parámetros
+    , numParametros  :: Int
+    , posTS          :: Maybe Int     -- posición en tabla de símbolos
+    } deriving (Show, Eq)
+
+infoSemInicial :: InfoSem
+infoSemInicial = InfoSem
+    { tipo          = TipoVoid
+    , tamanio       = 0
+    , tipoDevuelto  = TipoVoid
+    , parametros    = []
+    , numParametros = 0
+    , posTS         = Nothing
+    }
+
+-- El símbolo de la pila combina el símbolo original con su info semántica
+data SimboloSem = SimboloSem
+    { simbolo :: Simbolo
+    , infoSem :: InfoSem
+    } deriving (Show)
+
 -- Para los mensajes de error de no terminales
 msgErrorNoTerminal :: NoTerminal -> String
 msgErrorNoTerminal A  = "Se esperaba leer los parámetros de la función"
