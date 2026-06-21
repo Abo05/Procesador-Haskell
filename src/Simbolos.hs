@@ -1,6 +1,7 @@
 module Simbolos where
 
 import Token (Token(..))
+import Data.List (intercalate)
 
 -- Representan los posibles símbolos que pueden estar en la pila
 data Simbolo
@@ -98,25 +99,49 @@ data TipoSem
     | TipoError
     deriving (Show, Eq)
 
+-- Tamaño en bytes de cada tipo. int: 2, float: 4, boolean: 1, string: 64, function 8 (Creo)
+tamanioTipo :: TipoSem -> Int
+tamanioTipo TipoEntero  = 2
+tamanioTipo TipoReal    = 4
+tamanioTipo TipoLogico  = 1
+tamanioTipo TipoCadena  = 64
+tamanioTipo TipoVoid    = 0
+tamanioTipo TipoFuncion = 8
+tamanioTipo TipoError   = 0
+
 -- Información semántica que puede tener un símbolo en la pila auxiliar
 data InfoSem = InfoSem
     { tipo           :: TipoSem
-    , tamanio        :: Int           -- tamaño en bytes
-    , tipoDevuelto   :: TipoSem       -- para funciones
+    , tipoRet        :: TipoSem       -- para funciones
     , parametros     :: [TipoSem]     -- lista de tipos de parámetros
     , numParametros  :: Int
     , posTS          :: Maybe Int     -- posición en tabla de símbolos
+    , despl          :: Int
     } deriving (Show, Eq)
 
+-- TODO Mirar si ponemos como tipo por defecto entero
+-- Me suena que tenía que ser así, pero no lo encuentro
 infoSemInicial :: InfoSem
 infoSemInicial = InfoSem
-    { tipo          = TipoVoid
-    , tamanio       = 0
-    , tipoDevuelto  = TipoVoid
+    { tipo          = TipoEntero
+    , despl         = 0
+    , tipoRet       = TipoVoid
     , parametros    = []
     , numParametros = 0
     , posTS         = Nothing
     }
+
+tipoAString :: TipoSem -> String
+tipoAString TipoEntero  = "entero"
+tipoAString TipoReal    = "real"
+tipoAString TipoLogico  = "lógico"
+tipoAString TipoCadena  = "cadena"
+tipoAString TipoVoid    = "void"
+tipoAString TipoFuncion = "función"
+tipoAString TipoError   = "error"
+
+mostrarParametros :: [TipoSem] -> String
+mostrarParametros = intercalate ", " . map tipoAString
 
 -- El símbolo de la pila combina el símbolo original con su info semántica
 data SimboloSem = SimboloSem

@@ -1,6 +1,6 @@
 module Asin (parsear) where
 
-import Simbolos     (SimboloSem(..), NoTerminal(..), Accion(..), infoSemInicial, msgErrorNoTerminal, msgErrorTerminal, Simbolo (..), InfoSem(..))
+import Simbolos     (SimboloSem(..), NoTerminal(..), infoSemInicial, msgErrorNoTerminal, msgErrorTerminal, Simbolo (..), InfoSem(..))
 import TablaLL      (tablaLL, Regla(..))
 import Token       (Token(..), formatToken, mismoTipo)
 import GErrores    (GError, registrarErrorAsin, CodErr (..))
@@ -8,6 +8,7 @@ import Alex        (getToken)
 import TablaSimbolos (TablaSimbolos, lexema)
 import System.IO   (Handle, hPutStr, hPutStrLn)
 import Reglas       (numReglaInt)
+import AccionesSem (aplicarAccion)
 
 -- Pila inicial: [Axioma P, Dollar]
 pilaInicial :: [SimboloSem]
@@ -77,7 +78,7 @@ bucleAsin _ ge _ _ _ _ [] _ tok = do
 
 -- Cima es terminal
 -- También se puede hacer con una función por partes
-bucleAsin input ge ts hTok hTS hParse (cima@(SimboloSem (Terminal tokenCima) info) : resto) aux tok =
+bucleAsin input ge ts hTok hTS hParse (cima@(SimboloSem (Terminal tokenCima) _) : resto) aux tok =
     if mismoTipo tokenCima tok
         then do
             -- Consumimos el token, pedimos el siguiente
@@ -106,7 +107,7 @@ bucleAsin input ge ts hTok hTS hParse (cima@(SimboloSem (Terminal tokenCima) inf
             parsear input ge' ts hTok hTS hParse
 
 -- Cima es no terminal
-bucleAsin input ge ts hTok hTS hParse (cima@(SimboloSem (NoTerminal nt) info) : resto) aux tok =
+bucleAsin input ge ts hTok hTS hParse (cima@(SimboloSem (NoTerminal nt) _) : resto) aux tok =
     case tablaLL nt tok of
         Nothing -> do
             -- Error: celda vacía; reset pila
@@ -124,8 +125,8 @@ bucleAsin input ge ts hTok hTS hParse (cima@(SimboloSem (NoTerminal nt) info) : 
             bucleAsin input ge ts hTok hTS hParse pilaNueva (cima:aux) tok
 
 -- Cima es acción semántica
-bucleAsin input ge ts hTok hTS hParse ((SimboloSem (Accion acc) info) : resto) aux tok = do
-    (ge', ts', resto', aux') <- aplicarAccion acc ge ts resto aux tok
+bucleAsin input ge ts hTok hTS hParse ((SimboloSem (Accion acc) _) : resto) aux tok = do
+    (ge', ts', resto', aux') <- aplicarAccion acc ge ts resto aux
     bucleAsin input ge' ts' hTok hTS hParse resto' aux' tok
 
 -- Dollar en medio (no debería ocurrir en uso normal)

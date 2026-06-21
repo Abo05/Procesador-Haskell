@@ -136,8 +136,13 @@ resolverIdent resto ge ts lexem =
             (Just tk, resto, ge, ts, False)
         Nothing ->
             -- Identificador: insertar o buscar
-            let (pos, ts', insertado) = insertarOBuscar lexem ts
-            in (Just (TkIdentificador pos), resto, ge, ts', insertado)
+            case insertarOBuscar lexem ts of
+                (Nothing, ts', _) ->
+                    -- Identificador no declarado fuera de zona de declaración
+                    let ge' = registrarError ErrIdNoDecl ge
+                    in (Nothing, resto, ge', ts', False)
+                (Just pos, ts', insertado) ->
+                    (Just (TkIdentificador pos), resto, ge, ts', insertado)
 
 ------------------------------------------------------
 

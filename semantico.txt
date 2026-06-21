@@ -101,12 +101,10 @@ Producciones = {
                                 then tipo_error}
              {AUX-=3}
 
-{27}S -> write E ; {S.tipo = if (E.tipo !€ {entero, real, cadena) then tipo_error
-                 , S.tipoRet = void} 
+{27}S -> write E ; {S.tipo = if (E.tipo !€ {entero, real, cadena) then tipo_error} 
              {AUX-=3}
 
-{28}S -> read id ; {S.tipo = if(buscarTipoTS(id.pos) !€ {entero, real, cadena)) then tipo_error
-                 , S.tipoRet = void}      
+{28}S -> read id ; {S.tipo = if(buscarTipoTS(id.pos) !€ {entero, real, cadena)) then tipo_error}      
              {AUX-=3}
 
 {29}S -> return X ; {S.tipo = if(X.tipo != S.tipoRet) then tipo_error}

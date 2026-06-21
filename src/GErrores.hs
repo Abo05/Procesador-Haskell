@@ -71,6 +71,8 @@ data CodErr
              | ErrIdInv
              | ErrNoTerminal
              | ErrTerminal
+             | ErrSemantico
+             | ErrIdNoDecl
              deriving Eq
 
 mensajeError :: CodErr -> String
@@ -87,5 +89,6 @@ mensajeError ErrMaxReal   = "valor real excede el máximo permitido"
 mensajeError ErrMaxCad    = "cadena excede el número máximo de caracteres"
 mensajeError ErrNumInv    = "carácter inesperado después de número"
 mensajeError ErrIdInv     = "identificador con carácter no válido"
+mensajeError ErrIdNoDecl = "identificador no declarado"
 mensajeError _            = "este error no debería salir. El sintáctico llamó a esta función"
 
