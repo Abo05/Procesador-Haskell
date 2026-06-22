@@ -1,4 +1,7 @@
-let int x = !1; //Hola, let int hola
-if(bool+x){} else 
+let boolean x; 
+if(!x)
+    x = true;
 
-++100 // 2.3 >= 2 && "\n"
+function int hola (int y){
+    write y;
+}

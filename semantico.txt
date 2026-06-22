@@ -177,7 +177,7 @@ I ->lambda
 //TODO:Mirar zonaDecl?
 //Si vuelves a declarar una variable en el mismo ambito??
                                   +------------------------------+
-B -> let {zonaDecl = true} T id ; |{añadirTipo(id.pos, T.tipo    |
+B -> {zonaDecl = true} let T id ; |{añadirTipo(id.pos, T.tipo    |
                                   | , añadirDespl(id.pos, despl) | 
                                   | , desplazamiento += T.tamaño |        ////Regla 45 
                                   | , zonaDecl = false           |
@@ -206,7 +206,7 @@ B -> let {zonaDecl = true} T id ; |{añadirTipo(id.pos, T.tipo    |
 //Y si declaro dos veces la funcion o un parametro???
 //Se supone que puede no haber return
 //Y si hago tipoRet un parametro heredado????????
-F -> function {zonaDecl = true} H id
+F -> {zonaDecl = true} function H id
     {añadeTipo(id.pos, tipo_funcion), añadeTipoRet(id.pos, H.tipo), C.tipoRet = H.tipo
     , añadeEtiq(id.pos, nuevaEtiq())),TSF = crearTabla(), desplazamiento = 0} 
     ( A {zonaDecl = false, añadeParametros(id.pos,A.parametros), añadeNumParametros(id.pos,A.numParametros)}

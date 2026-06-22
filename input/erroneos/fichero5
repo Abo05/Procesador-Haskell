@@ -1,0 +1,5 @@
+let int a;
+let boolean b;
+a = 5;
+b = true;
+write a + b;

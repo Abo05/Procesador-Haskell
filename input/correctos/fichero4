@@ -1,0 +1,17 @@
+let int x;
+let int y;
+x = 10;
+y = 3;
+function void imprimir(int val) {
+    write val;
+    return;
+}
+if (x > y && x > 5) {
+    //TODO: Mirar si queremos que esto funcione :--x;
+    let float m;
+}
+else{
+    imprimir(x);
+}
+
+imprimir(y);

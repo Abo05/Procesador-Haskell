@@ -1,3 +1,4 @@
+{- HLINT ignore "Use camelCase" -}
 module Reglas where
 
 data NumRegla

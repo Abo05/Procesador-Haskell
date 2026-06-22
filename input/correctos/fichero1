@@ -1,0 +1,13 @@
+let int contador;
+let float precio;
+let boolean activo;
+contador = 100;
+precio = 9.99;
+activo = true;
+function int duplicar(int n) {
+    return n + n;
+}
+write duplicar(contador);
+if (activo) {
+    write precio;
+}

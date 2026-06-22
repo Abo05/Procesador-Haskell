@@ -1,0 +1,11 @@
+let int resultado;
+function int maximo(int a, int b) {
+    if (a > b)
+        return a;
+    return b;
+}
+function int sumarMaximo(int x, int y, int z) {
+    return maximo(x, y) + z;
+}
+resultado = sumarMaximo(3, 7, 10);
+write resultado;

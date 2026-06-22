@@ -1,0 +1,10 @@
+let string nombre;
+let string saludo;
+let int edad;
+saludo = "Hola, ";
+read nombre;
+read edad;
+if (edad > 18) {
+    write saludo;
+    write nombre;
+}

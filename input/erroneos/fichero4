@@ -1,0 +1,6 @@
+function int darReal(void) {
+    let float r;
+    r = 1.5;
+    return r;
+}
+write darReal();

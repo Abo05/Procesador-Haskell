@@ -27,7 +27,7 @@ tablaLL B TkRead   = Just $ Regla ReglB_S [Accion AccBTipoRet, NoTerminal S, Acc
 tablaLL B TkReturn = Just $ Regla ReglB_S [Accion AccBTipoRet, NoTerminal S, Accion AccDec1]
 tablaLL B TkWrite  = Just $ Regla ReglB_S [Accion AccBTipoRet, NoTerminal S, Accion AccDec1]
 
-tablaLL B TkLet    = Just $ Regla ReglB_Let [Terminal TkLet, Accion AccZonaDecl, NoTerminal T,
+tablaLL B TkLet    = Just $ Regla ReglB_Let [Accion AccZonaDecl, Terminal TkLet, NoTerminal T,
                                          Terminal (TkIdentificador 0), Terminal TkPuntoComa, Accion AccBLet]
 tablaLL B TkIf     = Just $ Regla ReglB_If [Terminal TkIf, Terminal TkParentesisA, NoTerminal E, Terminal TkParentesisC, Accion AccBIf, NoTerminal Z, Accion AccDec5] 
 
@@ -70,7 +70,7 @@ tablaLL E1 TkEof         = Just $ Regla ReglE1_Lambda [Accion AccE1Void]
 
 --    F
 tablaLL F TkFunction = Just $ Regla ReglF_Function
-    [Terminal TkFunction, Accion AccZonaDecl, NoTerminal H, Terminal (TkIdentificador 0),
+    [Accion AccZonaDecl, Terminal TkFunction, NoTerminal H, Terminal (TkIdentificador 0),
      Accion AccFCrearTabla, Terminal TkParentesisA, NoTerminal A, Accion AccFParamA, Terminal TkParentesisC,
      Terminal TkLlaveA, NoTerminal C, Terminal TkLlaveC, Accion AccFLibTabla]
 
@@ -91,6 +91,7 @@ tablaLL I TkLlaveC   = Just $ Regla ReglI_Lambda []
 tablaLL I TkIf       = Just $ Regla ReglI_Lambda []
 tablaLL I TkElse     = Just $ Regla ReglI_Else [Terminal TkElse, Accion AccITipoRet, NoTerminal D, Accion AccDec2]
 tablaLL I TkFunction = Just $ Regla ReglI_Lambda []
+tablaLL I TkReturn   = Just $ Regla ReglI_Lambda []
 tablaLL I TkEof      = Just $ Regla ReglI_Lambda []
 
 --    K

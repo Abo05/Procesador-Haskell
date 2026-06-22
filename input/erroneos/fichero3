@@ -1,0 +1,6 @@
+let float f;
+f = 2.5;
+function int sumar(int a, int b) {
+    return a + b;
+}
+write sumar(f, 10);
