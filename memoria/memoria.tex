@@ -69,170 +69,25 @@
 
 \newpage
 
-\section{¿Qué es un procesador?}
-
-\subsection{Objetivo de la práctica}
-
-Un procesador se encarga de analizar un fichero que debe de estar escrito en un determinado lenguaje formal, como Java, C, ... 
-(aunque no tiene que ser un lenguaje de programación). Recibe como entrada un fichero a procesar y devuelve otra representación del fichero, 
-más adecuada para el proposito que se persigue, o correcto; o si el fichero contiene errores, un mensaje de error claro que permite corregir el fichero\\
-En el mundo de los lenguajes de progrmación, es un paso previo a la generación del código objeto para hacer un ejecutable del codigo.
-
-\subsection{Módulos de un procesador}
-
-Un procesador se puede dividir principalmente en los siguientes módulos interconectados, los cuales suelen actuar en forma de \textit{pipeline} o cascada, donde la salida de una fase sirve como entrada directa para la siguiente:
-
-\medskip % Añadimos un pequeño espacio
-
-\noindent\begin{minipage}[t]{0.35\textwidth} % Columna de la figura (35% del ancho de página)
-    \begin{figure}[H] % Usamos figure[H] del paquete 'float'
-        \centering
-        \includegraphics[width=\textwidth]{./procesador.png} % Escalamos la imagen al ancho de la columna
-        \caption{Esquema del procesador.}
-        \label{fig:modulos-procesador}
-    \end{figure}
-\end{minipage}%
-\hfill%
-\begin{minipage}[t]{0.6\textwidth} % Columna de la lista (60% del ancho de página)
-    \begin{enumerate}
-        \item \textbf{Analizador léxico (Scanner):} Es la primera fase del proceso. Su objetivo es leer el fichero de entrada carácter a carácter y agruparlos en unidades indivisibles con significado léxico, denominadas \textit{tokens} (como palabras reservadas, identificadores, números, operadores o símbolos de puntuación). Además, se encarga de "limpiar el código", descartando elementos innecesarios para la evaluación lógica, como los espacios en blanco, tabulaciones y comentarios. Internamente, el reconocimiento de estos \textit{tokens} se suele modelar mediante expresiones regulares y Autómatas Finitos Deterministas (AFD).
-        
-        \item \textbf{Analizador sintáctico (Parser):} Recibe el flujo de \textit{tokens} generado por la fase anterior y verifica que su disposición cumple con las reglas gramaticales del lenguaje formal. Su resultado suele ser una representación estructurada, como un Árbol de Sintaxis Abstracta (AST), que refleja la jerarquía de las operaciones.
-        
-        \item \textbf{Analizador semántico:} Toma la estructura generada por el analizador sintáctico y comprueba que, además de estar bien formada, tiene sentido y coherencia. Aquí se realizan tareas como la comprobación de tipos, la verificación del ámbito de las variables o asegurar que una variable ha sido declarada antes de usarse.
-        
-        \item \textbf{Tabla de símbolos:} Es una estructura de datos transversal al resto de analizadores. Actúa como un diccionario donde se registra información vital sobre los identificadores encontrados en el código (variables, funciones, etc.), guardando atributos como su tipo de dato, su ámbito de visibilidad o su posición de memoria.
-        
-        \item \textbf{Gestor de errores:} Es el módulo encargado de interceptar cualquier anomalía durante el proceso de compilación o interpretación. Su misión es recuperarse en la medida de lo posible y emitir mensajes de diagnóstico precisos, indicando la línea y la naturaleza del error para que el programador pueda solucionarlo.
-    \end{enumerate}
-\end{minipage}
-
-\subsection{Ámbito de la práctica}
-
-El desarrollo de esta práctica se centra en la implementación de un procesador utilizando el paradigma de programación funcional, concretamente mediante el lenguaje \textit{Haskell} dado en la asignatura. El objetivo principal es construir las fases iniciales descritas anteriormente: análisis léxico y sintáctico; haciendo especial hincapié en el modelado modular.\\
-Se querría haber desarrollado también el analizador semántico sin embargo, debido al tiempo dado para hacer la práctica y su coincidencia con otros trabajos y exámenes nos ha sido imposible terminar la realización de dicho módulo. No obstante, gracias al diseño estrictamente modular empleado en la arquitectura del sistema, se deja la estructura totalmente preparada y abierta para la incorporación futura de esta fase de análisis sin necesidad de reestructurar el núcleo del procesador ya desarrollado.
-
-\subsection{Características del lenguaje}
-
-Se ha decido que el procesador realizado se encargará de procesar un lenguaje inventado basado en JavaScript, que tiene carácteristicas simplificadas para poder hacer la práctica. En la realidad el lenguaje sería más complejo aunque, esto sólo sopondría añadir más estados a los autómatas hechos ya que, la lógica subyacente sería la misma.
-
-\begin{description}
-    \item[Generalidades y formato:] el lenguaje implementado es \textit{case-sensitive}, esto es que distingue entre mayúsculas y minúsculas; en el que los espacios en blanco, tabulaciones y saltos de línea se tratan como separadores ignorados por el analizador. Las sentencias simples y las declaraciones explícitas finalizan obligatoriamente con un punto y coma (\texttt{;}). El lenguaje admite comentarios de línea mediante el uso del doble operador de división (\texttt{//}).
-    
-    \item[Estructura de bloques y ámbito:] El lenguaje presenta una estructura de bloques delimitados por llaves (\texttt{\{} y \texttt{\}}). Maneja los conceptos de:
-    \begin{itemize}
-        \item \textbf{Ámbito global:} Identificadores declarados fuera de cualquier función o variables utilizadas de forma implícita (sin declaración previa), las cuales se asumen por defecto como globales y de tipo entero (\texttt{int}).
-        \item \textbf{Ámbito local:} Variables declaradas explícitamente mediante la palabra clave \texttt{let} en el interior de una función, siendo visibles únicamente desde su declaración hasta el cierre de la misma. No se permite la definición de funciones anidadas.
-    \end{itemize}
-
-    \item[Tipos de datos y constantes:] Se da soporte a los siguientes tipos de datos básicos, sin existencia de conversiones automáticas de tipo implícitas:
-    \begin{itemize}
-        \item \textbf{Entero (\texttt{int}):} Representa valores numéricos de 16 bits con signo (rango hasta 32767).
-        \item \textbf{Real (\texttt{float}):} Valores numéricos de 32 bits con signo. Su representación requiere obligatoriamente al menos un dígito antes y después del punto decimal (ej. \texttt{3.0}).
-        \item \textbf{Cadena (\texttt{string}):} Secuencias de caracteres delimitadas por comillas. Ocupan un tamaño fijo en memoria y soportan hasta un máximo de 64 caracteres.
-        \item \textbf{Lógico (\texttt{boolean}):} Representado mediante las constantes reservadas \texttt{true} y \texttt{false}.
-        \item \textbf{Vacío (\texttt{void}):} Utilizado exclusivamente para denotar la ausencia de tipo de retorno o de parámetros en las funciones.
-    \end{itemize}
-
-    \item[Operadores y precedencia:] El sistema modela un conjunto cerrado de operadores agrupados por su funcionalidad (de menor a mayor precedencia):
-    \begin{enumerate}
-        \item Asignación simple (\texttt{=}).
-        \item Operador lógico AND (\texttt{\&\&}).
-        \item Operadores relacionales de comparación: mayor (\texttt{>}) y mayor o igual (\texttt{>=}).
-        \item Operadores aritméticos binarios: suma (\texttt{+}) y resta (\texttt{-}).
-        \item Operadores unarios de alta precedencia: negación lógica (\texttt{!}), autodecremento (\texttt{--}), así como el signo más (\texttt{+}) y menos (\texttt{-}) unarios.
-    \end{enumerate}
-    Se permite la utilización de paréntesis de apertura y cierre para alterar el orden natural de evaluación de las expresiones.
-
-    \item[Sentencias del lenguaje:] Además de las expresiones de asignación, el flujo de ejecución se compone de:
-    \begin{itemize}
-        \item \textbf{Instrucciones de Entrada/Salida:} \texttt{read} (para la lectura de datos por teclado hacia una variable) y \texttt{write} (para la evaluación y salida por pantalla de expresiones).
-        \item \textbf{Estructuras condicionales:} Sentencias de control \texttt{if} (sencilla) e \texttt{if-else} (compuesta) para la bifurcación del flujo lógico orientada a bloques. Cabe destacar que este dialecto prescinde de bucles iterativos.
-    \end{itemize}
-
-    \item[Funciones y recursividad:] Las funciones se declaran mediante la palabra clave \texttt{function} y deben definirse en el ámbito global antes de ser invocadas. El paso de parámetros se realiza estrictamente por valor y se garantiza soporte completo para la recursividad, permitiendo que una función se invoque a sí misma. El retorno de valores se gestiona explícitamente mediante la sentencia \texttt{return}.
-\end{description}
-
-\newpage
-
-\section{Arquitectura y Decisiones de Diseño}
-
-\subsection{Estructura de módulos}
-
-El código se ha estructurado en módulos con alta coherencia y baja acoplación, separando estrictamente la lógica pura de las mónadas (\textit{IO}):
-
-\begin{itemize}
-    \item \textbf{\texttt{Main.hs}:} Actúa como orquestador. Gestiona los argumentos de entrada, la lectura perezosa (\textit{lazy}) del fichero fuente y la apertura/cierre de los ficheros de salida. Es el punto de entrada de la mónada \texttt{IO}.
-    \item \textbf{\texttt{Token.hs} y \texttt{Simbolos.hs}:} Contienen el núcleo del modelo de datos. Definen los Tipos de Datos Algebraicos (ADTs) que representan los componentes léxicos y gramaticales (terminales y no terminales).
-    \item \textbf{\texttt{Alex.hs}:} Implementa el analizador léxico. En lugar de usar bucles imperativos, modela las transiciones del autómata mediante recursión y \textit{Pattern Matching} sobre la cabeza de la cadena de entrada.
-    \item \textbf{\texttt{TablaLL.hs}:} Modela la matriz predictiva del analizador sintáctico. Aprovechando el \textit{Pattern Matching} bidimensional de Haskell, mapea pares de \texttt{(NoTerminal, Token)} a su correspondiente \texttt{Regla} gramatical de forma declarativa.
-    \item \textbf{\texttt{Asin.hs}:} El analizador sintáctico principal. Gestiona la pila de símbolos y coordina el flujo de análisis, escribiendo de forma secuencial en los ficheros de salida a medida que se validan las derivaciones.
-    \item \textbf{\texttt{GErrores.hs} y \texttt{TablaSimbolos.hs}:} Módulos de soporte que definen las estructuras inmutables para el control del estado transversal del procesador.
-\end{itemize}
-
-\subsection{Gestión del estado sin mutabilidad}
-
-En programación imperativa, estructuras como la Tabla de Símbolos o el Gestor de Errores suelen ser variables globales modificables. En este diseño puramente funcional, la mutabilidad no existe.
-
-El estado se propaga explícitamente a través de las funciones. Por ejemplo, en \texttt{Alex.hs}, cada transición de estado del autómata devuelve una tupla (\texttt{Resultado}) que no solo contiene el \texttt{Token} reconocido, sino también las versiones actualizadas de \texttt{GError} y \texttt{TablaSimbolos}:
-
-\begin{lstlisting}[language=Haskell, title={Firma del Analizador Léxico}]
-type Resultado = (Maybe Token, String, GError, TablaSimbolos, TsMod)
-getToken :: String -> GError -> TablaSimbolos -> Resultado
-\end{lstlisting}
-
-Este enfoque garantiza que el estado sea determinista y elimina por completo los efectos secundarios impredecibles, facilitando enormemente la depuración y garantizando la integridad de los datos durante todo el ciclo del \textit{pipeline}.
-
-\subsection{Tipos de Datos Algebraicos y Pattern Matching}
-
-Haskell permite que el código sea prácticamente una transcripción literal de la especificación matemática. La gramática y los tokens se han modelado utilizando tipos suma. Esto otorga al procesador seguridad a nivel de tipos (\textit{Type Safety}):
-
-\begin{lstlisting}[language=Haskell, title={Fragmento de Simbolos.hs}]
-data Simbolo
-    = Terminal Token
-    | NoTerminal NoTerminal
-    | Dollar
-\end{lstlisting}
-
-Gracias a esta estructura, el compilador de Haskell, mediante alertas de advertencia (\textit{exhaustiveness checking}), nos obliga a cubrir todos los casos posibles al procesar símbolos, previniendo errores en tiempo de ejecución.
-
-\subsection{Uso de la librería \texttt{System.IO}}
-La interacción con el sistema de archivos del sistema operativo se delega en las funciones de la librería estándar \texttt{System.IO}. Se utilizan manejadores de archivos (\texttt{Handle}) y modos de apertura explícitos (\texttt{WriteMode}) para volcar la información de forma estructurada en tres canales independientes:
-\begin{itemize}
-    \item \texttt{output/Tokens.txt}: El registro secuencial de los componentes léxicos procesados.
-    \item \texttt{output/TablaSimbolos.txt}: El volcado estático de las variables e identificadores únicos.
-    \item \texttt{output/Parse.txt}: El conjunto ordenado de índices de reglas que componen la derivación sintáctica.
-\end{itemize}
-
-\subsection{Procesamiento de flujos mediante Entrada/Salida perezosa}
-Una de las decisiones de diseño más relevantes del proyecto radica en la carga del fichero fuente a través de la función \texttt{readFile}. En lenguajes imperativos tradicionales como C, la lectura de un fichero suele requerir la asignación previa de un \textit{buffer} de memoria del tamaño total del archivo o bucles iterativos que bloquean el hilo de ejecución de forma activa.
-
-En este procesador, gracias a la \textbf{evaluación perezosa} (\textit{lazy}) intrínseca de Haskell, \texttt{readFile} no vuelca de golpe el contenido total del archivo en la memoria RAM del ordenador. En su lugar, transforma el archivo en una cadena de caracteres (\texttt{String}) evaluada de manera incremental. 
-
-A medida que el analizador léxico (\texttt{Alex.hs}) demanda nuevos caracteres para transicionar en el autómata y agrupar el siguiente token, el sistema operativo lee físicamente del disco solo los bytes estrictamente necesarios. Este comportamiento permite que el procesador mantenga un consumo de memoria mínimo y constante, independientemente de la longitud del código fuente a compilar, aislando la lógica del compilador de la gestión manual de flujos de E/S.
-
-\newpage
-
 \section{Diseño del analizador léxico}
 
 \subsection{Tokens}
-
-Los tokens que usamos para el analizador léxico son:
+Los tokens reconocidos por el analizador léxico, junto con sus lexemas o valores asociados, se detallan en la siguiente tabla:
 
 \begin{center}
 \begin{tabular}{c | c}
-    \textbf{Código} & \textbf{Lexema} \\ \hline
-    entero & valor \\
-    real & valor \\
+    \textbf{Código} & \textbf{Lexema / Valor} \\ \hline
+    entero & valor numérico \\
+    real & valor numérico \\
     cadena & lexema \\
     true & - \\
     false & - \\
-    parentesis apertura & - \\
-    parentesis cierre & - \\
+    parentesisApertura & - \\
+    parentesisCierre & - \\
     suma & - \\
     resta & - \\
-    mayor & -\\
-    mayor igual & - \\
+    mayor & - \\
+    mayorIgual & - \\
     not & - \\
     and & - \\
     autodecremento & - \\
@@ -244,9 +99,9 @@ Los tokens que usamos para el analizador léxico son:
     boolean & - \\
     float & - \\
     void & - \\
-    punto coma & - \\
-    llave apertura & - \\
-    llave cierre & - \\
+    puntoComa & - \\
+    llaveApertura & - \\
+    llaveCierre & - \\
     if & - \\
     else & - \\
     coma & - \\
@@ -258,10 +113,7 @@ Los tokens que usamos para el analizador léxico son:
 \end{tabular}
 \end{center}
 
-Además, los tokens se pasan envueltos en Maybe, esto permite que en caso de error haya una recuperación ya que, en vez de terminar la ejecuación simplemente se pasa Nothing y actuándo así como un indicador de error lógico.
-
 \subsection{Gramática}
-
 El conjunto de terminales $T$ de la gramática regular se define mediante la siguiente agrupación:
 
 {\small
@@ -278,9 +130,8 @@ T = \left\{
 \]
 }
 
-El conjunto de los no terminales es: $N = \{S, A, B, C, D, E, F, G, H, I, J, K\}$
+El conjunto de los no terminales es: $N = \{S, A, B, C, D, E, F, G, H, I, J, K\}$. El axioma es $S$ y las reglas de producción $P$ son:
 
-El axioma es: $S$ y las reglas de producción son:
 \[ 
 \begin{aligned}
 P = \{ & S \to \text{EOF} \mid \; \text{del } S \mid \; d A \mid \; c D \mid \; \_ D \mid \; \text{\textquotedbl} E \mid \; ( \; \mid \; ) \mid \; + \mid \; - I \mid \; > G \mid \; \\
@@ -296,19 +147,13 @@ P = \{ & S \to \text{EOF} \mid \; \text{del } S \mid \; d A \mid \; c D \mid \; 
        & I \to - \mid \lambda \\
        & J \to / K \\
        & K \to c_2 K \mid CR S \mid EOF \\
+\}
 \end{aligned}
 \]
 
-Siendo:
-\[
-    \begin{aligned}
-        \text{del} &= \{\text{espacio, TAB, CR}\} \\
-        c_1 &= T \setminus \{\text{\textbackslash, EOF, TAB, \textquotedbl}\} \\
-        c_2 &= T \setminus \{\text{EOF, TAB}\}
-    \end{aligned}
-\]
+Siendo: $\text{del} = \{\text{espacio, TAB, CR}\}$, $c_1 = T \setminus \{\text{\textbackslash, EOF, TAB, \textquotedbl}\}$ y $c_2 = T \setminus \{\text{EOF, TAB}\}$.
 
-\subsection{Diagrama del autómata y acciones semánticas}
+\subsection{Diagrama del autómata}
 
 A partir de la gramática regular, se diseñó el siguiente Autómata Finito Determinista (AFD):
 
@@ -321,42 +166,72 @@ A partir de la gramática regular, se diseñó el siguiente Autómata Finito Det
 
 \subsection{Descripción de las Acciones Semánticas}
 
-Conceptualmente, las acciones semánticas del autómata operan actualizando el estado de la lectura. En nuestra implementación en Haskell (\texttt{Alex.hs}), estas acciones no mutan variables globales como sí debría hacer en lenguajes como en C u otro lenguaje imperativo, y se podría de hacer mediante el uso de mónadas, sino que se resuelven mediante funciones puras que reciben el estado actual y devuelven el nuevo estado encapsulado. 
-
-La lógica abstracta de estas acciones es la siguiente:
+A continuación se detallan todas las acciones semánticas ejecutadas por el autómata durante el proceso de análisis léxico:
 
 \begin{description}
-    \item[G1 a G14, G19:] Generación directa de tokens simples sin atributos, por ejemplo, $\langle \text{eof}, - \rangle$, $\langle \text{not}, - \rangle$, $\langle \text{suma}, - \rangle$.
-    \item[G15 (Identificadores):] Se comprueba si el lexema acumulado es una palabra reservada (PR). Si lo es, se genera el token correspondiente. Si no, se consulta la Tabla de Símbolos pura (\texttt{insertarOBuscar}): si no existe, se inserta devolviendo la nueva tabla; finalmente, se genera el token $\langle \text{identificador}, \text{pos} \rangle$.
-    \item[G16 (Cadenas):] Se valida que el contador de caracteres no exceda el límite (64). Si es válido, se genera $\langle \text{cadena}, \text{lexema} \rangle$; en caso contrario, se emite un error léxico.
-    \item[G17 (Enteros):] Se verifica que el valor numérico calculado mediante recursión sea estrictamente menor que $2^{15} - 1$. Si lo supera, se registra un error (\texttt{ErrMaxEnt}); si no, se genera $\langle \text{entero}, \text{valor} \rangle$.
-    \item[G18 (Reales):] Similar al caso entero, se ensambla la parte entera y decimal mediante paso de parámetros funcionales. Se valida contra la cota máxima permitida para generar $\langle \text{real}, \text{valor} \rangle$ o registrar el error pertinente (\texttt{ErrMaxReal}).
-    \item[L, C, C', C'', N:] Acciones de lectura y concatenación. En Haskell, este comportamiento está implícito en la recursión sobre la lista de caracteres del archivo fuente , evitando mutaciones de cadenas en memoria.
+    \item[G1:] Generar Token $\langle \text{eof}, - \rangle$
+    \item[G2:] Generar Token $\langle \text{not}, - \rangle$
+    \item[G3:] Generar Token $\langle \text{and}, - \rangle$
+    \item[G4:] Generar Token $\langle \text{asignacion}, - \rangle$
+    \item[G5:] Generar Token $\langle \text{llaveApertura}, - \rangle$
+    \item[G6:] Generar Token $\langle \text{llaveCierre}, - \rangle$
+    \item[G7:] Generar Token $\langle \text{coma}, - \rangle$
+    \item[G8:] Generar Token $\langle \text{parentesisApertura}, - \rangle$
+    \item[G9:] Generar Token $\langle \text{parentesisCierre}, - \rangle$
+    \item[G10:] Generar Token $\langle \text{suma}, - \rangle$
+    \item[G11:] Generar Token $\langle \text{resta}, - \rangle$
+    \item[G12:] Generar Token $\langle \text{mayor}, - \rangle$
+    \item[G13:] Generar Token $\langle \text{mayorIgual}, - \rangle$
+    \item[G14:] Generar Token $\langle \text{autodecremento}, - \rangle$
+    \item[G15:] 
+        \textbf{if} $p \neq \text{null}$ \textbf{then} \\
+        \hspace*{1.5em} Generar Token $\langle \text{PR\_p}, - \rangle$ \\
+        \textbf{else} \\
+        \hspace*{1.5em} $p = \text{BuscarTS}(\text{lexema})$ \\
+        \hspace*{1.5em} \textbf{if} $p == \text{null}$ \textbf{then} \\
+        \hspace*{3em} $p = \text{InsertarTS}(\text{lexema})$ \\
+        \hspace*{1.5em} Generar Token $\langle \text{identificador}, p \rangle$
+    \item[G16:] 
+        \textbf{if} cont $< 65$ \textbf{then} \\
+        \hspace*{1.5em} Generar Token $\langle \text{cadena}, \text{lexema} \rangle$ \\
+        \textbf{else} \\
+        \hspace*{1.5em} Error(28)
+    \item[G17:] 
+        \textbf{if} $2^{15} > \text{num}$ \textbf{then} \\
+        \hspace*{1.5em} Generar Token $\langle \text{entero}, \text{num} \rangle$ \\
+        \textbf{else} \\
+        \hspace*{1.5em} Error(21)
+    \item[G18:] 
+        num = num $\times 10^{-\text{cont}}$ \\
+        \textbf{if} num $<$ NUM\_MAX \textbf{then} \\
+        \hspace*{1.5em} Generar Token $\langle \text{real}, \text{num} \rangle$ \\
+        \textbf{else} \\
+        \hspace*{1.5em} Error(24)
+    \item[G19:] Generar Token $\langle \text{puntoComa}, - \rangle$
+    \item[L:] Leer el siguiente caracter
+    \item[C:] $\text{lexema} = \text{caracter}$ (Inicializa el buffer del lexema con el carácter actual)
+    \item[C':] $\text{lexema} = \text{lexema} + \text{caracter}$ (Concatena el carácter actual al final del lexema)
+    \item[C''] $\text{lexema} = \text{''}; \; \text{cont} = 0$ (Limpia el lexema acumulado y reinicia el contador de longitud)
+    \item[N:] $\text{lexema} = \text{lexema} + \text{'\textbackslash n'}$ 
 \end{description}
 
 \subsection{Errores}
-
-Para la fase léxica, el analizador detecta y gestiona las siguientes anomalías:
-
+El analizador léxico detecta y gestiona las siguientes anomalías:
 \begin{itemize}
-    \item Caracteres desconocidos que no pertenecen al alfabeto del lenguaje.
-    \item El uso incorrecto o inacabado de comentarios (del tipo \texttt{//}).
-    \item El uso incompleto del operador lógico \texttt{and} (un solo \texttt{\&}).
-    \item La no terminación lógica de las cadenas de texto antes de un salto de línea.
-    \item Secuencias de escape inválidas dentro de literales de cadena.
+    \item Aparición de un carácter desconocido que no pertenece al alfabeto del lenguaje.
+    \item Uso incorrecto o inacabado de comentarios (del tipo \texttt{//}).
+    \item Uso incompleto del operador lógico \texttt{and} (un solo \texttt{\&}).
+    \item Falta de terminación lógica de las cadenas de texto antes de un salto de línea.
+    \item Uso de secuencias de escape no válidas en literales de cadena.
     \item Números reales mal formados (ej. falta de parte decimal tras el punto).
-    \item Exceso de tamaño en los literales numéricos o exceso de longitud en las cadenas.
+    \item Exceso de tamaño para los literales numéricos o exceso de longitud en cadenas.
 \end{itemize}
-
-A diferencia de otros enfoques, cuando el analizador léxico intercepta un error, no se lanzan excepciones que interrumpan el hilo de ejecución. En su lugar, se delega la gestión al módulo \texttt{GErrores.hs}, invocando a la función \texttt{registrarError}. Esta función toma el registro de estado actual (\texttt{GError}) y devuelve un nuevo registro que incluye el código de error y el número de línea exacto concatenado a la lista interna de fallos, permitiendo que el análisis y la recuperación de errores continúe.
-
 \newpage
 
 \section{Diseño del analizador sintáctico}
 
 \subsection{Gramática}
-
-Para el desarrollo del analizador sintáctico se ha diseñado una gramática en contexto formalizada para un análisis descendente tabular ($LL(1)$). Esta se define formalmente mediante la siguiente cuádrupla:
+Para el desarrollo del analizador sintáctico se ha diseñado una gramática en contexto formalizada para un análisis descendente tabular ($LL(1)$), definida mediante la siguiente cuádrupla:
 
 El conjunto de símbolos no terminales ($V_N$) es:
 \[ V_N = \{A, B, C, D, E, E', F, G, H, I, K, L, O, P, Q, R, R', S, T, U, U', V, W, X, Z\} \]
@@ -367,7 +242,7 @@ El conjunto de símbolos terminales ($V_T$) corresponde a los tokens identificad
 El axioma inicial es:
 \[ \text{Axioma} = P \]
 
-El conjunto completo de producciones ($P$) se numera secuencialmente a continuación para facilitar la posterior construcción de la tabla de análisis sintáctico:
+El conjunto completo de producciones ($P$) se numera secuencialmente a continuación:
 
 \noindent
 \begin{minipage}[t]{0.48\textwidth}
@@ -397,19 +272,19 @@ El conjunto completo de producciones ($P$) se numera secuencialmente a continuac
     &\text{(22)} \quad W \to \text{true} \\
     &\text{(23)} \quad W \to \text{false} \\
     &\text{(24)} \quad O \to ( L ) \\
-    &\text{(25)} \quad O \to \lambda  
-\end{aligned} \]
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.48\textwidth}
-\small
-\[ \begin{aligned}
+    &\text{(25)} \quad O \to \lambda  \\
     &\text{(26)} \quad S \to \text{id } G ; \\
     &\text{(27)} \quad S \to \text{write } E ; \\
     &\text{(28)} \quad S \to \text{read id} ; \\
     &\text{(29)} \quad S \to \text{return } X ; \\
     &\text{(30)} \quad G \to = E  \\
     &\text{(31)} \quad G \to ( L ) \\
+\end{aligned} \]
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\small
+\[ \begin{aligned}
     &\text{(32)} \quad L \to E Q  \\
     &\text{(33)} \quad L \to \lambda \\
     &\text{(34)} \quad Q \to , E Q \\
@@ -428,13 +303,7 @@ El conjunto completo de producciones ($P$) se numera secuencialmente a continuac
     &\text{(47)} \quad T \to \text{int} \\
     &\text{(48)} \quad T \to \text{float} \\
     &\text{(49)} \quad T \to \text{boolean} \\
-    &\text{(50)} \quad T \to \text{string} 
-\end{aligned} \]
-\end{minipage}
-
-\begin{center}
-\small
-\[ \begin{aligned}
+    &\text{(50)} \quad T \to \text{string} \\
     &\text{(51)} \quad F \to \text{function } H \text{ id } ( A ) \{ C \} \\
     &\text{(52)} \quad H \to T \\
     &\text{(53)} \quad H \to \text{void} \\
@@ -446,46 +315,22 @@ El conjunto completo de producciones ($P$) se numera secuencialmente a continuac
     &\text{(59)} \quad C \to \lambda \\
     &\text{(60)} \quad P \to B P \\
     &\text{(61)} \quad P \to F P \\
-    &\text{(62)} \quad P \to \lambda 
+    &\text{(62)} \quad P \to \lambda
 \end{aligned} \]
-\end{center}
+\end{minipage}
 
-\subsection{Tabla}
-Se adjunta en la última página de está sección la tabla del analizador sintáctico. Por motivos de su tamaño, está en su propia página y dada la vuelta para poder caber mejor. Se tuvo que calcular el \textit{First} y el \textit{Follow} de las reglas para poder hacerla, y la tabla demuestra que la gramática es $LL(1)$, ya que, de no serlo, deberían de coincidir en la misma casilla dos o más reglas.
+\subsection{Tabla Predictiva y Demostración LL(1)}
+Para la validación formal del analizador sintáctico, se calcularon los conjuntos de \textit{First} (Primero) y \textit{Follow} (Siguiente) de cada regla de producción. La tabla resultante demuestra empíricamente que la gramática planteada es estrictamente $LL(1)$, debido a la total ausencia de conflictos de tipo desplazamiento-reducción o reducción-reducción; es decir, no coincide más de una regla sintáctica en ninguna de las casillas predictivas. 
 
-\subsection{Implementación Funcional del Análisis Descendente}
-
-A diferencia de una implementación imperativa clásica, donde el analizador sintáctico dependería de una pila de memoria mutada explícitamente y una matriz bidimensional dispersa para la tabla predictiva, en este proyecto se ha optado por un enfoque funcional:
-
-\begin{itemize}
-    \item \textbf{La Tabla LL(1) como Función Pura (\texttt{TablaLL.hs}):} En lugar de reservar memoria estática o dinámica para una matriz de dimensiones $|V_N| \times |V_T|$ que  tiene un alto porcentaje de celdas vacías, la tabla se ha modelado como una función pura: 
-    \vspace{2ex}
-    \begin{lstlisting}[language=Haskell, title={Firma de la Tabla LL(1)}]
-    tablaLL :: NoTerminal -> Token -> Maybe Regla
-    \end{lstlisting}
-    Aprovechando el \textit{Pattern Matching} de Haskell, solo se definen explícitamente las intersecciones válidas. Cualquier combinación errónea o no contemplada cae en un caso por defecto que devuelve \texttt{Nothing}, simulando una celda vacía.
-
-    \item \textbf{Pila de Símbolos y Recursión (\texttt{Asin.hs}):} La pila de derivación se modela mediante una lista inmutable de Haskell (\texttt{[Simbolo]}), la cual se inicializa con el axioma de la gramática y el símbolo de fin de pila (\texttt{[NoTerminal P, Dollar]}). La función principal \texttt{bucleAsin} evalúa recursivamente la cabeza de esta lista (la cima de la pila):
-    \begin{itemize}
-        \item Si la cima es un \textbf{Terminal}, verifica que coincida con el token actual y avanza la lectura.
-        \item Si la cima es un \textbf{No Terminal}, consulta \texttt{tablaLL}. Si obtiene una regla, inyecta la lista de símbolos del consecuente al inicio de la pila remanente (\texttt{cons ++ resto}) mediante una nueva llamada recursiva, escribiendo simultáneamente el número de regla en el fichero de salida \texttt{Parse.txt} aprovechando la mónada \texttt{IO}.
-    \end{itemize}
-\end{itemize}
+Se adjunta la tabla al final de esta sección.
 
 \subsection{Gestión de Errores Sintácticos}
-
-El analizador sintáctico es capaz de detectar y recuperarse de divergencias gramaticales sin abortar la ejecución del compilador. Se interceptan dos naturalezas principales de error:
+El analizador sintáctico realiza un control de flujo estructurado para interceptar y registrar anomalías gramaticales sin abortar el proceso global. Conceptualmente, las inconsistencias se clasifican en dos naturalezas:
 
 \begin{enumerate}
-    \item \textbf{Discordancia de Terminales:} Ocurre cuando el símbolo en la cima de la pila es un terminal, pero no coincide con el token suministrado por el analizador léxico. El gestor emite un error detallado (ej. \textit{"Se esperaba leer un punto y coma, pero se leyó la palabra reservada if"}).
-    \item \textbf{Celdas Vacías en la Tabla Predictiva:} Ocurre cuando el símbolo en la cima es un No Terminal, pero la \texttt{tablaLL} devuelve \texttt{Nothing} para el token actual. El módulo \texttt{Simbolos.hs} mapea este fallo a un mensaje semántico contextualizado (ej. para el No Terminal \texttt{F}: \textit{"Se esperaba leer la declaración de una función"}).
+    \item \textbf{Discordancia de Terminales:} Se produce cuando el símbolo en la cima de la pila de derivación es un terminal concreto, pero no se corresponde lógicamente con el token proporcionado en ese instante por el analizador léxico.
+    \item \textbf{Celdas Vacías en la Tabla Predictiva:} Ocurre cuando la cima de la pila contiene un símbolo no terminal, pero al cruzarlo con el token actual del flujo de entrada, la matriz predictiva devuelve una transición indeterminada o nula (\texttt{Nothing}), denotando una estructura de sentencia inválida.
 \end{enumerate}
-
-\subsubsection{Estrategia de Recuperación}
-
-Frente a la detección de cualquier anomalía sintáctica, la arquitectura funcional permite una recuperación robusta y controlada. Cuando la función \texttt{bucleAsin} detecta un error, delega la actualización del registro en la función \texttt{registrarErrorAsin} (que añade la falla al historial de la estructura inmutable \texttt{GError}). 
-
-Tras actualizar el estado, en lugar de arrastrar un árbol sintáctico corrupto, el proceso se resetea recursivamente llamando de nuevo a la función de enrutamiento principal (\texttt{parsear}). Esto limpia la pila de símbolos actual, la reinicia a su estado original (\texttt{pilaInicial}) y fuerza al analizador a buscar el siguiente punto de sincronización lógico en el flujo de tokens, permitiendo volcar todos los errores del fichero en una sola pasada.
 
 \begin{sidewaystable}[p]
     \centering
@@ -527,11 +372,285 @@ Tras actualizar el estado, en lugar de arrastrar un árbol sintáctico corrupto,
 
 \newpage
 
-\section{Diseño del gestor de errores}
-Durante los anterirores apartados ya se ha hablado de los errores que se detectan y que mensaje de error se saca en estos casos, por lo tanto, esta sección se va a mencionar ligeramente parte de la implemetación.
+\section{Diseño del analizador semántico}
 
-Para el gestor de errores hemos decidido hacer recuperación de errores, así el gestor recopila los errores del archivo entero y luego los vuelca una vez terminado de analizar el fichero entero. Esto tiene un punto malo y es que si bien se detectan más errores, una parte de los errores detectados es debido al error anterior, por ejemplo, si tenemos una cadena no cerrada, se va a detectar todo lo que este en su misma línea como parte de la cadena, pudiendo dar un error de que no se finaliza con punto y coma. Esto no es un error de diseño sino una decisión consciente, la mayoría de compiladores y lsp (language servers) modernos actuán así para poder ayudar más al programador con el contra de dar más falsos errores.
+Para el diseño del analizador semántico se ha definido el siguiente Esquema de Traducción (EdT), detallando las acciones semánticas asociadas a cada regla de producción para la comprobación de tipos y generación de la tabla de símbolos.
 
-Para el contéo del número de línea, creamos una función la cual el analizador léxico llama cada vez que lee el delimitador salto de línea. Además, como se ha decidido hacer una implementación que fuera lo más funcional posible, el gestor de errores no es una estructura mutable sino, que cada vez que se actualiza se pasa una copia con el nuevo error o la línea actual actualizada.
+\renewcommand{\arraystretch}{1.6} 
+
+\begin{longtable}{|c|>{\raggedright\arraybackslash}p{5.5cm}|>{\raggedright\arraybackslash}p{10cm}|}
+\hline
+\textbf{\#} & \textbf{Producción} & \textbf{Acciones Semánticas} \\ \hline
+\endhead
+
+\hline
+\multicolumn{3}{|r|}{\textit{Continúa en la siguiente página...}} \\
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+% Regla 1
+1 & $E \to R \; E_1$ & 
+$E.tipo = \texttt{if}(E_1.tipo == \texttt{void} \lor R.tipo == E_1.tipo)$ \newline
+\hspace*{0.5cm} $\texttt{then } R.tipo$ \newline
+\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
+\texttt{\{AUX -= 2\}} \\ \hline
+
+% Regla 2
+2 & $E_1 \to \&\& \; R \; E_{1\_1}$ & 
+$E_1.tipo = \texttt{if}(R.tipo == \texttt{logico} \land E_{1\_1}.tipo \in \{\texttt{logico, void}\})$ \newline
+\hspace*{0.5cm} $\texttt{then } R.tipo$ \newline
+\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
+\texttt{\{AUX -= 3\}} \\ \hline
+
+% Regla 3
+3 & $E_1 \to \lambda$ & 
+$E_1.tipo = \texttt{void}$ \newline
+\texttt{\{AUX -= 0\}} \\ \hline
+
+% Regla 4
+4 & $R \to U \; R_1$ & 
+$R.tipo = \texttt{if}(R_1.tipo == \texttt{void}) \texttt{ then } U.tipo$ \newline
+\hspace*{0.5cm} $\texttt{else if}(U.tipo == R_1.tipo) \texttt{ then logico}$ \newline
+\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
+\texttt{\{AUX -= 2\}} \\ \hline
+
+% Regla 5
+5 & $R_{1\_1} \to > \; U \; R_{1\_2}$ & 
+$R_{1\_1}.tipo = \texttt{if}(U.tipo \in \{\texttt{real, entero}\} \land R_{1\_2} == \texttt{void})$ \newline
+\hspace*{0.5cm} $\texttt{then } U.tipo$ \newline
+\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
+\texttt{\{AUX -= 3\}} \\ \hline
+
+% Regla 6
+6 & $R_{1\_1} \to \ge \; U \; R_{1\_2}$ & 
+$R_{1\_1}.tipo = \texttt{if}(U.tipo \in \{\texttt{real, entero}\} \land R_{1\_2} == \texttt{void})$ \newline
+\hspace*{0.5cm} $\texttt{then } U.tipo$ \newline
+\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
+\texttt{\{AUX -= 3\}} \\ \hline
+
+% Regla 7
+7 & $R_1 \to \lambda$ & 
+$R_1.tipo = \texttt{void}$ \newline
+\texttt{\{AUX -= 0\}} \\ \hline
+
+% Regla 8
+8 & $U \to V \; U_1$ & 
+$U.tipo = \texttt{if}(U_1.tipo == \texttt{void} \lor V.tipo == U_1.tipo)$ \newline
+\hspace*{0.5cm} $\texttt{then } V.tipo$ \newline
+\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
+\texttt{\{AUX -= 2\}} \\ \hline
+
+% Regla 9
+9 & $U_1 \to + \; V \; U_{1\_1}$ & 
+$U_1.tipo = \texttt{if}((V.tipo \in \{\texttt{entero, real}\} \land U_{1\_1}.tipo == \texttt{void}) \lor V.tipo == U_{1\_1}.tipo)$ \newline
+\hspace*{0.5cm} $\texttt{then } V.tipo$ \newline
+\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
+\texttt{\{AUX -= 3\}} \\ \hline
+
+% Regla 10
+10 & $U_1 \to - \; V \; U_{1\_1}$ & 
+$U_1.tipo = \texttt{if}((V.tipo \in \{\texttt{entero, real}\} \land U_{1\_1}.tipo == \texttt{void}) \lor V.tipo == U_{1\_1}.tipo)$ \newline
+\hspace*{0.5cm} $\texttt{then } V.tipo$ \newline
+\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
+\texttt{\{AUX -= 3\}} \\ \hline
+
+% Regla 11
+11 & $U_1 \to \lambda$ & 
+$U_1.tipo = \texttt{void}$ \newline
+\texttt{\{AUX -= 0\}} \\ \hline
+
+% Regla 12
+12 & $V \to + \; W$ & 
+$V.tipo = \texttt{if}(W.tipo \in \{\texttt{entero, real}\}) \texttt{ then } W.tipo$ \newline
+\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
+\texttt{\{AUX -= 2\}} \\ \hline
+
+% Regla 13
+13 & $V \to - \; W$ & 
+$V.tipo = \texttt{if}(W.tipo \in \{\texttt{entero, real}\}) \texttt{ then } W.tipo$ \newline
+\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
+\texttt{\{AUX -= 2\}} \\ \hline
+
+% Regla 14
+14 & $V \to ! \; W$ & 
+$V.tipo = \texttt{if}(W.tipo == \texttt{lógico}) \texttt{ then tipo\_logico}$ \newline
+\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
+\texttt{\{AUX -= 2\}} \\ \hline
+
+% Regla 15
+15 & $V \to -- \; \mathbf{id}$ & 
+$V.tipo = \texttt{if}(\text{buscarTipo}(\mathbf{id}.pos) \in \{\texttt{real, entero}\})$ \newline
+\hspace*{0.5cm} $\texttt{then } \text{buscarTipo}(\mathbf{id}.pos)$ \newline
+\hspace*{0.5cm} $\texttt{else tipo\_error}$ \newline
+\texttt{\{AUX -= 2\}} \\ \hline
+
+% Regla 16
+16 & $V \to W$ & 
+$V.tipo = W.tipo$ \newline
+\texttt{\{AUX -= 1\}} \\ \hline
+
+% Regla 17
+17 & $W \to \mathbf{id} \; O$ & 
+$W.tipo = \texttt{if}(O.tipo == \texttt{void}) \texttt{ then } \text{buscarTipo}(\mathbf{id}.pos)$ \newline
+\hspace*{0.5cm} $\texttt{else if}(\text{buscarParam}(\mathbf{id}.pos) == O.parametros)$ \newline
+\hspace*{1cm} $\texttt{then } \text{buscarTipoRet}(\mathbf{id}.pos)$ \newline
+\hspace*{1cm} $\texttt{else tipo\_error}$ \newline
+\texttt{\{AUX -= 2\}} \\ \hline
+
+% Regla 18
+18 & $W \to ( \; E \; )$ & 
+$W.tipo = E.tipo$ \newline
+\texttt{\{AUX -= 3\}} \\ \hline
+
+% Regla 19, 20, 21, 22, 23
+19 & $W \to \texttt{entero}$ & $W.tipo = \texttt{entero}$ \hspace{1cm} \texttt{\{AUX -= 1\}} \\ \hline
+20 & $W \to \texttt{real}$ & $W.tipo = \texttt{real}$ \hspace{1.2cm} \texttt{\{AUX -= 1\}} \\ \hline
+21 & $W \to \texttt{cadena}$ & $W.tipo = \texttt{cadena}$ \hspace{0.9cm} \texttt{\{AUX -= 1\}} \\ \hline
+22 & $W \to \texttt{true}$ & $W.tipo = \texttt{lógico}$ \hspace{1cm} \texttt{\{AUX -= 1\}} \\ \hline
+23 & $W \to \texttt{false}$ & $W.tipo = \texttt{lógico}$ \hspace{1cm} \texttt{\{AUX -= 1\}} \\ \hline
+
+% Regla 24
+24 & $O \to ( \; L \; )$ & 
+$O.tipo = \texttt{tipo\_funcion}$ \newline
+$O.parametros = L.parametros$ \newline
+$O.numParam = L.numeroParametros$ \newline
+\texttt{\{AUX -= 3\}} \\ \hline
+
+% Regla 25
+25 & $O \to \lambda$ & 
+$O.tipo = \texttt{void}$ \newline
+\texttt{\{AUX -= 0\}} \\ \hline
+
+% Regla 26
+26 & $S \to \mathbf{id} \; G \; ;$ & 
+$S.tipo = \texttt{if}(\text{buscarTipo}(\mathbf{id}.pos) == G.tipo == \texttt{tipo\_funcion})$ \newline
+\hspace*{0.5cm} $\texttt{then if}(\text{buscarParam}(\mathbf{id}.pos) \neq G.parametros) \texttt{ tipo\_error}$ \newline
+\hspace*{0.5cm} $\texttt{else if}(\text{buscarTipo}(\mathbf{id}.pos) \neq G.tipo) \texttt{ then tipo\_error}$ \newline
+\texttt{\{AUX -= 3\}} \\ \hline
+
+% Regla 27
+27 & $S \to \texttt{write} \; E \; ;$ & 
+$S.tipo = \texttt{if}(E.tipo \notin \{\texttt{entero, real, cadena}\}) \texttt{ then tipo\_error}$ \newline
+$S.tipoRet = \texttt{void}$ \newline
+\texttt{\{AUX -= 3\}} \\ \hline
+
+% Regla 28
+28 & $S \to \texttt{read} \; \mathbf{id} \; ;$ & 
+$S.tipo = \texttt{if}(\text{buscarTipoTS}(\mathbf{id}.pos) \notin \{\texttt{entero, real, cadena}\})$ \newline
+\hspace*{0.5cm} $\texttt{then tipo\_error}$ \newline
+$S.tipoRet = \texttt{void}$ \newline
+\texttt{\{AUX -= 3\}} \\ \hline
+
+% Regla 29
+29 & $S \to \texttt{return} \; X \; ;$ & 
+$S.tipo = \texttt{if}(X.tipo \neq S.tipoRet) \texttt{ then tipo\_error}$ \newline
+\texttt{\{AUX -= 3\}} \\ \hline
+
+% Regla 30
+30 & $G \to = \; E$ & 
+$G.tipo = E.tipo$ \newline
+\texttt{\{AUX -= 2\}} \\ \hline
+
+% Regla 31
+31 & $G \to ( \; L \; )$ & 
+$G.tipo = \texttt{tipo\_funcion}$ \newline
+$G.parametros = L.parametros, G.numParam = L.numParametros$ \newline
+\texttt{\{AUX -= 3\}} \\ \hline
+
+% Regla 32, 33, 34, 35
+32 & $L \to E \; Q$ & $L.param = E.tipo \times Q.param, L.numP = 1 + Q.numP$ \newline \texttt{\{AUX -= 2\}} \\ \hline
+33 & $L \to \lambda$ & $L.param = \texttt{void}, L.numP = 0$ \hspace{1cm} \texttt{\{AUX -= 0\}} \\ \hline
+34 & $Q_1 \to , \; E \; Q_2$ & $Q_1.param = E.tipo \times Q_2.param, Q_1.numP = 1 + Q_2.numP$ \newline \texttt{\{AUX -= 3\}} \\ \hline
+35 & $Q \to \lambda$ & $Q.param = \texttt{void}, Q.numP = 0$ \hspace{1cm} \texttt{\{AUX -= 0\}} \\ \hline
+
+% Regla 38, 39 (IF)
+38, 39 & $B \to \texttt{if} \; ( \; E \; ) \; Z$ & 
+$B.tipo = \texttt{if}(E.tipo == \texttt{logico}) \texttt{ then tipo\_error}$ \newline
+$B.tipoRet = Z.tipoRet$ \newline
+\texttt{\{AUX -= 5\}} \\ \hline
+
+% Regla 51, 52 (LET)
+51, 52 & $B \to \texttt{let} \; T \; \mathbf{id} \; ;$ & 
+$\texttt{zonaDecl = true}$ \newline
+$\text{añadirTipo}(\mathbf{id}.pos, T.tipo)$ \newline
+$\text{añadirDespl}(\mathbf{id}.pos, despl)$ \newline
+$\text{desplazamiento} += T.\text{tamaño}$ \newline
+$\texttt{zonaDecl = false}$ \newline
+\texttt{\{AUX -= 4\}} \\ \hline
+
+% Regla 58, 59, 60 (Function)
+58-60 & $F \to \texttt{function} \; H \; \mathbf{id} \; ( \; A \; ) \; \{ \; C \; \}$ & 
+$\texttt{zonaDecl = true}, \text{añadeTipo}(\mathbf{id}.pos, \texttt{tipo\_func})$ \newline
+$\text{añadeTipoRet}(\mathbf{id}.pos, H.tipo), C.tipoRet = H.tipo$ \newline
+$\text{añadeEtiq}(\mathbf{id}.pos, \text{nuevaEtiq}())$ \newline
+$TSF = \text{crearTabla}(), \text{despl} = 0, \texttt{zonaDecl = false}$ \newline
+$\text{añadeParam}(\mathbf{id}.pos, A.param), \text{liberarTabla}(TSF)$ \newline
+\texttt{\{AUX -= 9\}} \\ \hline
+
+% Regla 68, 69 (Programa Principal)
+68, 69 & $PP \to P$ & 
+$TS = \text{crearTabla}(), \text{desplazamiento} = 0$ \newline
+$\text{liberarTabla}(TS)$ \newline
+\texttt{\{AUX -= 1\}} \\ \hline
+
+\end{longtable}
+
+\subsection{Errores}
+El analizador semántico detecta y gestiona los siguientes errores de tipado e incoherencias de contexto:
+
+\begin{itemize}
+    \item Uso de tipos incompatibles en expresiones lógicas y relacionales (ej. operadores \texttt{and}, \texttt{>}, \texttt{>=}).
+    \item Operaciones aritméticas sin conversión implícita de tipos (mezcla de enteros y reales sin coerción explícita).
+    \item Invocación de funciones con número o tipo incorrecto de parámetros en comparación con su declaración.
+    \item Asignación de valores a variables de distinto tipo.
+    \item Utilización de las sentencias \texttt{write} y \texttt{read} con variables de tipos no permitidos (solo se admite entero, real o cadena).
+    \item Discordancia entre el tipo devuelto por la sentencia \texttt{return} y el tipo de retorno declarado en la firma de la función.
+    \item Evaluación de sentencias de control (como el condicional \texttt{if}) donde la expresión interna no se resuelve a un tipo lógico.
+\end{itemize}
+
+\newpage
+
+\section{Diseño de la Tabla de Símbolos}
+
+Para la gestión de los identificadores del programa se ha diseñado una Tabla de Símbolos estructurada en dos niveles de ámbito: global y local. Esta decisión permite dar soporte a la declaración de variables dentro y fuera de las funciones, así como al sombreado de variables.
+
+\subsection{Organización y Ámbitos}
+\begin{itemize}
+    \item \textbf{Tabla Global:} Almacena las variables declaradas en el flujo principal del programa, así como las firmas de las funciones. Sus elementos se indexan lógicamente con valores enteros positivos (0, 1, 2, \dots).
+    \item \textbf{Tabla Local:} Se crea de forma dinámica al entrar en el contexto de una función (tras leer la palabra reservada \texttt{function}) y se destruye al salir de la misma. Para diferenciar sus entradas de las globales de forma eficiente, los identificadores locales se indexan mediante valores enteros negativos (-1, -2, -3, \dots).
+\end{itemize}
+
+\subsection{Estructura de la Información}
+La política de acceso y resolución de nombres se basa en una búsqueda lineal, consultando siempre en primer lugar el ámbito local (si existe) y, de no encontrar coincidencia, procediendo al ámbito global. 
+
+Cada registro en la tabla almacena los siguientes atributos actualizados por el analizador semántico:
+\begin{itemize}
+    \item \textbf{Lexema:} La cadena de texto que da nombre al identificador.
+    \item \textbf{Tipo de dato:} Entero, real, lógico, cadena, void o función.
+    \item \textbf{Desplazamiento (\textit{Offset}):} Dirección relativa de memoria calculada a partir del tamaño en bytes del tipo de dato asociado (ej. entero = 2 bytes, real = 4 bytes, cadena = 64 bytes).
+    \item \textbf{Atributos de función:} Si el identificador corresponde a una función, se almacena adicionalmente su tipo de retorno, el número total de parámetros esperados y una lista ordenada con los tipos exactos de dichos parámetros.
+\end{itemize}
+
+\newpage
+
+\section{Diseño del Gestor de Errores}
+
+El gestor de errores es un módulo transversal invocado por los analizadores léxico, sintáctico y semántico ante cualquier anomalía en el código fuente.
+
+\subsection{Seguimiento de Líneas}
+Para proporcionar diagnósticos precisos que permitan al programador localizar los fallos, el procesador mantiene un contador de línea actual. Este contador es incrementado exclusivamente por el analizador léxico cada vez que detecta el delimitador de salto de línea. Cuando el gestor registra un error, este se asocia de manera automática a la línea en curso.
+
+\subsection{Estrategia de Recuperación de Errores}
+Se ha tomado la decisión de diseño de implementar un mecanismo de recuperación de errores en lugar de abortar la compilación o detener el programa ante el primer fallo detectado. El objetivo es analizar la totalidad del fichero fuente y emitir un informe completo en una sola pasada.
+
+El funcionamiento lógico se estructura de la siguiente manera:
+\begin{itemize}
+    \item \textbf{Detección y Registro:} Cuando un analizador detecta una estructura inválida (ej. un carácter extraño, un token no esperado o un tipo semántico incompatible), se genera una alerta con su código de error, descripción y línea. Esta alerta se concatena en el registro interno del gestor.
+    \item \textbf{Sincronización:} En lugar de colapsar, el sistema descarta la cadena conflictiva o reinicia las estructuras de análisis temporales (como la pila sintáctica o el lexema acumulado) hasta encontrar el siguiente punto de sincronización lógico y seguro (por ejemplo, un delimitador de final de sentencia \texttt{;} o el cierre de un bloque \texttt{\}}). Esto permite retomar la evaluación del resto del código.
+    \item \textbf{Inconvenientes (Errores en Cascada):} Como contrapartida a la recuperación sistemática, esta técnica genera en ocasiones errores derivados o falsos positivos. Por ejemplo, si una cadena de texto no se cierra correctamente con comillas dobles, el analizador léxico absorberá el resto de caracteres de su misma línea, lo que provocará casi con seguridad que el analizador sintáctico emita errores por falta de terminadores lógicos (como el punto y coma) que quedaron engullidos. Esta es una decisión consciente y un estándar adoptado por los compiladores modernos, asumiendo que informar de múltiples fallos útiles compensa la aparición ocasional de falsos positivos en cascada.
+\end{itemize}
 
 \end{document}
