@@ -140,13 +140,13 @@ tablaLL P TkWrite    = Just $ Regla ReglP_BP [NoTerminal B, NoTerminal P, Accion
 tablaLL P TkEof      = Just $ Regla ReglP_Lambda []
 
 --    PP
-tablaLL PP (TkIdentificador _) = Just $ Regla ReglP_BP [Accion AccCrearTabla, NoTerminal P, Accion AccLibTabla]
-tablaLL PP TkLet      = Just $ Regla ReglP_BP [Accion AccCrearTabla, NoTerminal P, Accion AccLibTabla]
-tablaLL PP TkIf       = Just $ Regla ReglP_BP [Accion AccCrearTabla, NoTerminal P, Accion AccLibTabla]
-tablaLL PP TkFunction = Just $ Regla ReglP_FP [Accion AccCrearTabla, NoTerminal P, Accion AccLibTabla]
-tablaLL PP TkRead     = Just $ Regla ReglP_BP [Accion AccCrearTabla, NoTerminal P, Accion AccLibTabla]
-tablaLL PP TkReturn   = Just $ Regla ReglP_BP [Accion AccCrearTabla, NoTerminal P, Accion AccLibTabla]
-tablaLL PP TkWrite    = Just $ Regla ReglP_BP [Accion AccCrearTabla, NoTerminal P, Accion AccLibTabla]
+tablaLL PP (TkIdentificador _) = Just $ Regla ReglPP_P [Accion AccCrearTabla, NoTerminal P, Accion AccLibTabla]
+tablaLL PP TkLet      = Just $ Regla ReglPP_P [Accion AccCrearTabla, NoTerminal P, Accion AccLibTabla]
+tablaLL PP TkIf       = Just $ Regla ReglPP_P [Accion AccCrearTabla, NoTerminal P, Accion AccLibTabla]
+tablaLL PP TkFunction = Just $ Regla ReglPP_P [Accion AccCrearTabla, NoTerminal P, Accion AccLibTabla]
+tablaLL PP TkRead     = Just $ Regla ReglPP_P [Accion AccCrearTabla, NoTerminal P, Accion AccLibTabla]
+tablaLL PP TkReturn   = Just $ Regla ReglPP_P [Accion AccCrearTabla, NoTerminal P, Accion AccLibTabla]
+tablaLL PP TkWrite    = Just $ Regla ReglPP_P [Accion AccCrearTabla, NoTerminal P, Accion AccLibTabla]
 tablaLL PP TkEof      = Just $ Regla ReglP_Lambda []
 
 --    Q

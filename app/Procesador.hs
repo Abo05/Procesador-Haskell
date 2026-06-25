@@ -28,6 +28,9 @@ main = do
     -- Cabecera de la tabla de símbolos global
     hPutStrLn hTS "CONTENIDO DE LA TABLA # 1 :"
 
+    -- Indicador de tipo de analizador para el fichero Parse
+    hPutStrLn hParse "Descendente"
+
     -- Inicializamos el gestor de errores y la tabla de símbolos
     let ge0 = gErrorInicial
         ts0 = tablaInicial

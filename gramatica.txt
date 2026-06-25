@@ -1,0 +1,68 @@
+Terminales = { id entero real cadena true false let int float boolean string void if else function read write return && > >= + - ! -- = ; , ( { } ) eof lambda }
+NoTerminales = { A B C D E E1 F G H I K L O P PP Q R R1 S T U U1 V W X Z }
+Axioma = PP
+Producciones = {
+E -> R E1
+E1 -> && R E1
+E1 -> lambda
+R -> U R1
+R1 -> > U R1
+R1 -> >= U R1
+R1 -> lambda
+U -> V U1
+U1 -> + V U1
+U1 -> - V U1
+U1 -> lambda
+V -> + W
+V -> - W
+V -> ! W
+V -> -- id
+V -> W
+W -> id O
+W -> ( E )
+W -> entero
+W -> real
+W -> cadena
+W -> true
+W -> false
+O -> ( L )
+O -> lambda
+S -> id G ;
+S -> write E ;
+S -> read id ;
+S -> return X ;
+G -> = E
+G -> ( L )
+L -> E Q
+L -> lambda
+Q -> , E Q
+Q -> lambda
+X -> E
+X -> lambda
+B -> if ( E ) Z
+Z -> S
+Z -> { C } I
+I -> else D
+I -> lambda
+D -> if ( E ) { C } I
+D -> { C }
+B -> let T id ;
+B -> S
+T -> int
+T -> float
+T -> boolean
+T -> string
+F -> function H id ( A ) { C }
+H -> T
+H -> void
+A -> T id K
+A -> void
+K -> , T id K
+K -> lambda
+C -> B C
+C -> lambda
+P -> B P
+P -> F P
+P -> lambda
+PP -> P
+}

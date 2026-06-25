@@ -70,6 +70,7 @@ data NumRegla
     | ReglP_BP           -- 60: P  -> B P
     | ReglP_FP           -- 61: P  -> F P
     | ReglP_Lambda       -- 62: P  -> lambda
+    | ReglPP_P           -- Nueva regla para el axioma inicial (PP -> P)
     deriving (Show, Eq, Enum)
 
 -- +1 porque Enum empieza en 0
