@@ -49,7 +49,11 @@
     showstringspaces=false,
     showtabs=false,                  
     tabsize=2,
-    frame=single % Añade un marco alrededor del código
+    frame=single, % <--- Coma añadida aquí antes del comentario
+    literate=
+      {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+      {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+      {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {¿}{{?}}1 {¡}{{!}}1
 }
 
 \title{MEMORIA CUARTA PRACTICA:\\ PROCESADOR DE LENGUAJE EN HASKELL}
@@ -653,4 +657,644 @@ El funcionamiento lógico se estructura de la siguiente manera:
     \item \textbf{Inconvenientes (Errores en Cascada):} Como contrapartida a la recuperación sistemática, esta técnica genera en ocasiones errores derivados o falsos positivos. Por ejemplo, si una cadena de texto no se cierra correctamente con comillas dobles, el analizador léxico absorberá el resto de caracteres de su misma línea, lo que provocará casi con seguridad que el analizador sintáctico emita errores por falta de terminadores lógicos (como el punto y coma) que quedaron engullidos. Esta es una decisión consciente y un estándar adoptado por los compiladores modernos, asumiendo que informar de múltiples fallos útiles compensa la aparición ocasional de falsos positivos en cascada.
 \end{itemize}
 
+\newpage
+
+\section{Anexo: Casos de prueba}
+
+\subsection{Ficheros correctos}
+
+\subsubsection{Fichero Correcto 1}
+\begin{lstlisting}[title={fichero1.txt}]
+let int contador;
+let float precio;
+let boolean activo;
+contador = 100;
+precio = 9.99;
+activo = true;
+function int duplicar(int n) {
+    return n + n;
+}
+write duplicar(contador);
+if (activo) {
+    write precio;
+}
+\end{lstlisting}
+
+\textbf{Listado de Tokens:}
+\begin{lstlisting}
+<let,>
+<int,>
+<identificador,0>
+<puntoComa,>
+<let,>
+<float,>
+<identificador,1>
+<puntoComa,>
+<let,>
+<boolean,>
+<identificador,2>
+<puntoComa,>
+<identificador,0>
+<asignacion,>
+<entero,100>
+<puntoComa,>
+<identificador,1>
+<asignacion,>
+<real,9.99>
+<puntoComa,>
+<identificador,2>
+<asignacion,>
+<true,>
+<puntoComa,>
+<function,>
+<int,>
+<identificador,3>
+<parentesisApertura,>
+<int,>
+<identificador,-1>
+<parentesisCierre,>
+<llaveApertura,>
+<return,>
+<identificador,-1>
+<suma,>
+<identificador,-1>
+<puntoComa,>
+<llaveCierre,>
+<write,>
+<identificador,3>
+<parentesisApertura,>
+<identificador,0>
+<parentesisCierre,>
+<puntoComa,>
+<if,>
+<parentesisApertura,>
+<identificador,2>
+<parentesisCierre,>
+<llaveApertura,>
+<write,>
+<identificador,1>
+<puntoComa,>
+<llaveCierre,>
+<eof,>
+\end{lstlisting}
+
+\textbf{Tabla de Símbolos:}
+\begin{lstlisting}
+CONTENIDO DE LA TABLA # 1 :
+* LEXEMA : 'contador'
+    +Tipo: entero
+    +Desplazamiento: 0
+* LEXEMA : 'precio'
+    +Tipo: real
+    +Desplazamiento: 2
+* LEXEMA : 'activo'
+    +Tipo: lógico
+    +Desplazamiento: 6
+* LEXEMA : 'duplicar'
+    +Tipo: función
+    +Desplazamiento: 0
+    +TipoRet: entero
+    +NumParametros: 1
+    +Parametros: entero
+
+CONTENIDO DE LA TABLA # 2 :
+* LEXEMA : 'n'
+    +Tipo: entero
+    +Desplazamiento: 0
+\end{lstlisting}
+
+\textbf{Secuencia de Parse:}
+\begin{lstlisting}
+60 60 45 47 60 45 48 60 45 49 60 46 26 30 1 4 8 16 19 11 7 3 60 46 26 30 1 4 8 16 20 11 7 3 60 46 26 30 1 4 8 16 22 11 7 3 61 51 52 47 54 47 57 58 46 29 36 1 4 8 16 17 25 9 16 17 25 11 7 3 59 60 46 27 1 4 8 16 17 24 32 1 4 8 16 17 25 11 7 3 35 11 7 3 60 38 1 4 8 16 17 25 11 7 3 40 58 46 27 1 4 8 16 17 25 11 7 3 59 42 62
+\end{lstlisting}
+
+\textbf{Árbol de Análisis Sintáctico:}
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{./arbol_vast_1.png} 
+    \caption{Árbol de derivación generado con VASt para el fichero 1.}
+\end{figure}
+
+\subsubsection{Fichero Correcto 2}
+\begin{lstlisting}[title={fichero2.txt}]
+let int resultado;
+function int maximo(int a, int b) {
+    if (a > b)
+        return a;
+    return b;
+}
+function int sumarMaximo(int x, int y, int z) {
+    return maximo(x, y) + z;
+}
+resultado = sumarMaximo(3, 7, 10);
+write resultado;
+\end{lstlisting}
+
+\textbf{Listado de Tokens:}
+\begin{lstlisting}
+<let,>
+<int,>
+<identificador,0>
+<puntoComa,>
+<function,>
+<int,>
+<identificador,1>
+<parentesisApertura,>
+<int,>
+<identificador,-1>
+<coma,>
+<int,>
+<identificador,-2>
+<parentesisCierre,>
+<llaveApertura,>
+<if,>
+<parentesisApertura,>
+<identificador,-1>
+<mayor,>
+<identificador,-2>
+<parentesisCierre,>
+<return,>
+<identificador,-1>
+<puntoComa,>
+<return,>
+<identificador,-2>
+<puntoComa,>
+<llaveCierre,>
+<function,>
+<int,>
+<identificador,2>
+<parentesisApertura,>
+<int,>
+<identificador,-1>
+<coma,>
+<int,>
+<identificador,-2>
+<coma,>
+<int,>
+<identificador,-3>
+<parentesisCierre,>
+<llaveApertura,>
+<return,>
+<identificador,1>
+<parentesisApertura,>
+<identificador,-1>
+<coma,>
+<identificador,-2>
+<parentesisCierre,>
+<suma,>
+<identificador,-3>
+<puntoComa,>
+<llaveCierre,>
+<identificador,0>
+<asignacion,>
+<identificador,2>
+<parentesisApertura,>
+<entero,3>
+<coma,>
+<entero,7>
+<coma,>
+<entero,10>
+<parentesisCierre,>
+<puntoComa,>
+<write,>
+<identificador,0>
+<puntoComa,>
+<eof,>
+\end{lstlisting}
+
+\textbf{Tabla de Símbolos:}
+\begin{lstlisting}
+CONTENIDO DE LA TABLA # 1 :
+* LEXEMA : 'resultado'
+    +Tipo: entero
+    +Desplazamiento: 0
+* LEXEMA : 'maximo'
+    +Tipo: función
+    +Desplazamiento: 0
+    +TipoRet: entero
+    +NumParametros: 2
+    +Parametros: entero, entero
+* LEXEMA : 'sumarMaximo'
+    +Tipo: función
+    +Desplazamiento: 0
+    +TipoRet: entero
+    +NumParametros: 3
+    +Parametros: entero, entero, entero
+
+CONTENIDO DE LA TABLA # 2 :
+* LEXEMA : 'a'
+    +Tipo: entero
+    +Desplazamiento: 0
+* LEXEMA : 'b'
+    +Tipo: entero
+    +Desplazamiento: 2
+    
+CONTENIDO DE LA TABLA # 3 :
+* LEXEMA : 'x'
+    +Tipo: entero
+    +Desplazamiento: 0
+* LEXEMA : 'y'
+    +Tipo: entero
+    +Desplazamiento: 2
+* LEXEMA : 'z'
+    +Tipo: entero
+    +Desplazamiento: 4
+\end{lstlisting}
+
+\textbf{Secuencia de Parse:}
+\begin{lstlisting}
+60 60 45 47 61 51 52 47 54 47 56 47 57 58 38 1 4 8 16 17 25 11 5 8 16 17 25 11 7 3 39 29 36 1 4 8 16 17 25 11 7 3 58 46 29 36 1 4 8 16 17 25 11 7 3 59 61 51 52 47 54 47 56 47 56 47 57 58 46 29 36 1 4 8 16 17 24 32 1 4 8 16 17 25 11 7 3 34 1 4 8 16 17 25 11 7 3 35 9 16 17 25 11 7 3 59 60 46 26 30 1 4 8 16 17 24 32 1 4 8 16 19 11 7 3 34 1 4 8 16 19 11 7 3 34 1 4 8 16 19 11 7 3 35 11 7 3 60 46 27 1 4 8 16 17 25 11 7 3 62
+\end{lstlisting}
+
+\textbf{Árbol de Análisis Sintáctico:}
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{./arbol_vast_2.png} 
+    \caption{Árbol de derivación generado con VASt para el fichero 2.}
+\end{figure}
+
+\subsubsection{Fichero Correcto 3}
+\begin{lstlisting}[title={fichero3.txt}]
+let string nombre;
+let string saludo;
+let int edad;
+saludo = "Hola, ";
+read nombre;
+read edad;
+if (edad > 18) {
+    write saludo;
+    write nombre;
+}
+\end{lstlisting}
+
+\textbf{Listado de Tokens:}
+\begin{lstlisting}
+<let,>
+<string,>
+<identificador,0>
+<puntoComa,>
+<let,>
+<string,>
+<identificador,1>
+<puntoComa,>
+<let,>
+<int,>
+<identificador,2>
+<puntoComa,>
+<identificador,1>
+<asignacion,>
+<cadena,Hola, >
+<puntoComa,>
+<read,>
+<identificador,0>
+<puntoComa,>
+<read,>
+<identificador,2>
+<puntoComa,>
+<if,>
+<parentesisApertura,>
+<identificador,2>
+<mayor,>
+<entero,18>
+<parentesisCierre,>
+<llaveApertura,>
+<write,>
+<identificador,1>
+<puntoComa,>
+<write,>
+<identificador,0>
+<puntoComa,>
+<llaveCierre,>
+<eof,>
+\end{lstlisting}
+
+\textbf{Tabla de Símbolos:}
+\begin{lstlisting}
+CONTENIDO DE LA TABLA # 1 :
+* LEXEMA : 'nombre'
+    +Tipo: cadena
+    +Desplazamiento: 0
+* LEXEMA : 'saludo'
+    +Tipo: cadena
+    +Desplazamiento: 64
+* LEXEMA : 'edad'
+    +Tipo: entero
+    +Desplazamiento: 128
+\end{lstlisting}
+
+\textbf{Secuencia de Parse:}
+\begin{lstlisting}
+60 60 45 50 60 45 50 60 45 47 60 46 26 30 1 4 8 16 21 11 7 3 60 46 28 60 46 28 60 38 1 4 8 16 17 25 11 5 8 16 19 11 7 3 40 58 46 27 1 4 8 16 17 25 11 7 3 58 46 27 1 4 8 16 17 25 11 7 3 59 42 62
+\end{lstlisting}
+
+\textbf{Árbol de Análisis Sintáctico:}
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{./arbol_vast_3.png} 
+    \caption{Árbol de derivación generado con VASt para el fichero 3.}
+\end{figure}
+
+\subsubsection{Fichero Correcto 4}
+\begin{lstlisting}[title={fichero4.txt}]
+let int x;
+let int y;
+x = 10;
+y = 3;
+function void imprimir(int val) {
+    write val;
+    return;
+}
+if (x > y && x > 5) {
+    //TODO: Mirar si queremos que esto funcione :--x;
+    let float m;
+}
+else{
+    imprimir(x);
+}
+
+imprimir(y);
+\end{lstlisting}
+
+\textbf{Listado de Tokens:}
+\begin{lstlisting}
+<let,>
+<int,>
+<identificador,0>
+<puntoComa,>
+<let,>
+<int,>
+<identificador,1>
+<puntoComa,>
+<identificador,0>
+<asignacion,>
+<entero,10>
+<puntoComa,>
+<identificador,1>
+<asignacion,>
+<entero,3>
+<puntoComa,>
+<function,>
+<void,>
+<identificador,2>
+<parentesisApertura,>
+<int,>
+<identificador,-1>
+<parentesisCierre,>
+<llaveApertura,>
+<write,>
+<identificador,-1>
+<puntoComa,>
+<return,>
+<puntoComa,>
+<llaveCierre,>
+<if,>
+<parentesisApertura,>
+<identificador,0>
+<mayor,>
+<identificador,1>
+<and,>
+<identificador,0>
+<mayor,>
+<entero,5>
+<parentesisCierre,>
+<llaveApertura,>
+<let,>
+<float,>
+<identificador,3>
+<puntoComa,>
+<llaveCierre,>
+<else,>
+<llaveApertura,>
+<identificador,2>
+<parentesisApertura,>
+<identificador,0>
+<parentesisCierre,>
+<puntoComa,>
+<llaveCierre,>
+<identificador,2>
+<parentesisApertura,>
+<identificador,1>
+<parentesisCierre,>
+<puntoComa,>
+<eof,>
+\end{lstlisting}
+
+\textbf{Tabla de Símbolos:}
+\begin{lstlisting}
+CONTENIDO DE LA TABLA # 1 :
+* LEXEMA : 'x'
+    +Tipo: entero
+    +Desplazamiento: 0
+* LEXEMA : 'y'
+    +Tipo: entero
+    +Desplazamiento: 2
+* LEXEMA : 'imprimir'
+    +Tipo: función
+    +Desplazamiento: 0
+    +TipoRet: void
+    +NumParametros: 1
+    +Parametros: entero
+* LEXEMA : 'm'
+    +Tipo: real
+    +Desplazamiento: 4
+
+CONTENIDO DE LA TABLA # 2 :
+* LEXEMA : 'val'
+    +Tipo: entero
+    +Desplazamiento: 0
+\end{lstlisting}
+
+\textbf{Secuencia de Parse:}
+\begin{lstlisting}
+60 60 45 47 60 45 47 60 46 26 30 1 4 8 16 19 11 7 3 60 46 26 30 1 4 8 16 19 11 7 3 61 51 53 54 47 57 58 46 27 1 4 8 16 17 25 11 7 3 58 46 29 37 59 60 38 1 4 8 16 17 25 11 5 8 16 17 25 11 7 2 4 8 16 17 25 11 5 8 16 19 11 7 3 40 58 45 48 59 41 44 58 46 26 31 32 1 4 8 16 17 25 11 7 3 35 59 60 46 26 31 32 1 4 8 16 17 25 11 7 3 35 62
+\end{lstlisting}
+
+\textbf{Árbol de Análisis Sintáctico:}
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{./arbol_vast_4.png} 
+    \caption{Árbol de derivación generado con VASt para el fichero 4.}
+\end{figure}
+
+\subsubsection{Fichero Correcto 5}
+\begin{lstlisting}[title={fichero5.txt}]
+let int n;
+n = 5;
+function int factorial(int x) {
+    if (x > 1) {
+        return x + factorial(x + -1);
+    }
+    return 1;
+}
+write factorial(n);
+\end{lstlisting}
+
+\textbf{Listado de Tokens:}
+\begin{lstlisting}
+<let,>
+<int,>
+<identificador,0>
+<puntoComa,>
+<identificador,0>
+<asignacion,>
+<entero,5>
+<puntoComa,>
+<function,>
+<int,>
+<identificador,1>
+<parentesisApertura,>
+<int,>
+<identificador,-1>
+<parentesisCierre,>
+<llaveApertura,>
+<if,>
+<parentesisApertura,>
+<identificador,-1>
+<mayor,>
+<entero,1>
+<parentesisCierre,>
+<llaveApertura,>
+<return,>
+<identificador,-1>
+<suma,>
+<identificador,1>
+<parentesisApertura,>
+<identificador,-1>
+<suma,>
+<resta,>
+<entero,1>
+<parentesisCierre,>
+<puntoComa,>
+<llaveCierre,>
+<return,>
+<entero,1>
+<puntoComa,>
+<llaveCierre,>
+<write,>
+<identificador,1>
+<parentesisApertura,>
+<identificador,0>
+<parentesisCierre,>
+<puntoComa,>
+<eof,>
+\end{lstlisting}
+
+\textbf{Tabla de Símbolos:}
+\begin{lstlisting}
+CONTENIDO DE LA TABLA # 1 :
+* LEXEMA : 'n'
+    +Tipo: entero
+    +Desplazamiento: 0
+* LEXEMA : 'factorial'
+    +Tipo: función
+    +Desplazamiento: 0
+    +TipoRet: entero
+    +NumParametros: 1
+    +Parametros: entero
+
+CONTENIDO DE LA TABLA # 2 :
+* LEXEMA : 'x'
+    +Tipo: entero
+    +Desplazamiento: 0
+\end{lstlisting}
+
+\textbf{Secuencia de Parse:}
+\begin{lstlisting}
+60 60 45 47 60 46 26 30 1 4 8 16 19 11 7 3 61 51 52 47 54 47 57 58 38 1 4 8 16 17 25 11 5 8 16 19 11 7 3 40 58 46 29 36 1 4 8 16 17 25 9 16 17 24 32 1 4 8 16 17 25 9 13 19 11 7 3 35 11 7 3 59 42 58 46 29 36 1 4 8 16 19 11 7 3 59 60 46 27 1 4 8 16 17 24 32 1 4 8 16 17 25 11 7 3 35 11 7 3 62
+\end{lstlisting}
+
+\textbf{Árbol de Análisis Sintáctico:}
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{./arbol_vast_5.png} 
+    \caption{Árbol de derivación generado con VASt para el fichero 5.}
+\end{figure}
+
+
+\subsection{Ficheros con errores}
+
+\subsubsection{Fichero Erróneo 1}
+\begin{lstlisting}[title={fichero1\_erroneo.txt}]
+let int a;
+let float b;
+b = 3.14;
+a = b;
+write a;
+\end{lstlisting}
+
+\textbf{Errores obtenidos:}
+\begin{lstlisting}
+=== ERRORES ===
+error en la linea 5: Intentando asignar a una variable de tipo entero un valor de tipo real
+\end{lstlisting}
+
+\subsubsection{Fichero Erróneo 2}
+\begin{lstlisting}[title={fichero2\_erroneo.txt}]
+let int x;
+x = 5;
+if (x + 3) {
+    write x;
+}
+\end{lstlisting}
+
+\textbf{Errores obtenidos:}
+\begin{lstlisting}
+=== ERRORES ===
+error en la linea 3: La expresion dentro del if debe ser de tipo logico, sin embargo esta evaluando una expresion de tipo entero
+\end{lstlisting}
+
+\subsubsection{Fichero Erróneo 3}
+\begin{lstlisting}[title={fichero3\_erroneo.txt}]
+let float f;
+f = 2.5;
+function int sumar(int a, int b) {
+    return a + b;
+}
+write sumar(f, 10);
+\end{lstlisting}
+
+\textbf{Errores obtenidos:}
+\begin{lstlisting}
+=== ERRORES ===
+error en la linea 6: Los parametros de la llamada a la funcion son incorrectos, se esperaba los tipos entero, entero
+error en la linea 6: Se estan operando dos expresiones de distinto tipo, la primera expresion es del tipo error, mientras que la segunda es del tipo void
+error en la linea 6: Se estan comparando dos expresiones de distinto tipo, la primera expresion es del tipo error ,mientras que la segunda es del tipo void
+error en la linea 6: Se estan comparando dos expresiones de distinto tipo, la primera expresion es del tipo error, mientras que la segunda es del tipo void
+error en la linea 7: La expresion write solo admite expresiones del tipo entero, real, cadena. Sin embargo esta recibiendo un tipo error
+\end{lstlisting}
+
+\subsubsection{Fichero Erróneo 4}
+\begin{lstlisting}[title={fichero4\_erroneo.txt}]
+function int darReal(void) {
+    let float r;
+    r = 1.5;
+    return r;
+}
+write darReal();
+\end{lstlisting}
+
+\textbf{Errores obtenidos:}
+\begin{lstlisting}
+=== ERRORES ===
+error en la linea 5: Tipo devuelto incorrecto, se esperaba devolver un tipo entero pero se devuelve un tipo real
+\end{lstlisting}
+
+\subsubsection{Fichero Erróneo 5}
+\begin{lstlisting}[title={fichero5\_erroneo.txt}]
+let int a;
+let boolean b;
+a = 5;
+b = true;
+write a + b;
+\end{lstlisting}
+
+\textbf{Errores obtenidos:}
+\begin{lstlisting}
+=== ERRORES ===
+error en la linea 5: Solo se pueden sumar expresiones del tipo entero o real. La primera expresion es del tipo logico, mientras que la segunda es del tipo void
+error en la linea 5: Se estan operando dos expresiones de distinto tipo, la primera expresion es del tipo entero, mientras que la segunda es del tipo error
+error en la linea 5: Se estan comparando dos expresiones de distinto tipo, la primera expresion es del tipo error ,mientras que la segunda es del tipo void
+error en la linea 5: Se estan comparando dos expresiones de distinto tipo, la primera expresion es del tipo error, mientras que la segunda es del tipo void
+error en la linea 6: La expresion write solo admite expresiones del tipo entero, real, cadena. Sin embargo esta recibiendo un tipo error
+\end{lstlisting}
 \end{document}
