@@ -888,7 +888,7 @@ CONTENIDO DE LA TABLA # 2 :
 * LEXEMA : 'b'
     +Tipo: entero
     +Desplazamiento: 2
-    
+
 CONTENIDO DE LA TABLA # 3 :
 * LEXEMA : 'x'
     +Tipo: entero
@@ -1225,7 +1225,7 @@ write a;
 \textbf{Errores obtenidos:}
 \begin{lstlisting}
 === ERRORES ===
-error en la linea 5: Intentando asignar a una variable de tipo entero un valor de tipo real
+error en la linea 4: Intentando asignar a una variable de tipo entero un valor de tipo real
 \end{lstlisting}
 
 \subsubsection{Fichero Erróneo 2}
@@ -1257,10 +1257,8 @@ write sumar(f, 10);
 \begin{lstlisting}
 === ERRORES ===
 error en la linea 6: Los parametros de la llamada a la funcion son incorrectos, se esperaba los tipos entero, entero
-error en la linea 6: Se estan operando dos expresiones de distinto tipo, la primera expresion es del tipo error, mientras que la segunda es del tipo void
 error en la linea 6: Se estan comparando dos expresiones de distinto tipo, la primera expresion es del tipo error ,mientras que la segunda es del tipo void
 error en la linea 6: Se estan comparando dos expresiones de distinto tipo, la primera expresion es del tipo error, mientras que la segunda es del tipo void
-error en la linea 7: La expresion write solo admite expresiones del tipo entero, real, cadena. Sin embargo esta recibiendo un tipo error
 \end{lstlisting}
 
 \subsubsection{Fichero Erróneo 4}
@@ -1276,7 +1274,7 @@ write darReal();
 \textbf{Errores obtenidos:}
 \begin{lstlisting}
 === ERRORES ===
-error en la linea 5: Tipo devuelto incorrecto, se esperaba devolver un tipo entero pero se devuelve un tipo real
+error en la linea 4: Tipo devuelto incorrecto, se esperaba devolver un tipo entero pero se devuelve un tipo real
 \end{lstlisting}
 
 \subsubsection{Fichero Erróneo 5}
@@ -1292,9 +1290,7 @@ write a + b;
 \begin{lstlisting}
 === ERRORES ===
 error en la linea 5: Solo se pueden sumar expresiones del tipo entero o real. La primera expresion es del tipo logico, mientras que la segunda es del tipo void
-error en la linea 5: Se estan operando dos expresiones de distinto tipo, la primera expresion es del tipo entero, mientras que la segunda es del tipo error
-error en la linea 5: Se estan comparando dos expresiones de distinto tipo, la primera expresion es del tipo error ,mientras que la segunda es del tipo void
 error en la linea 5: Se estan comparando dos expresiones de distinto tipo, la primera expresion es del tipo error, mientras que la segunda es del tipo void
-error en la linea 6: La expresion write solo admite expresiones del tipo entero, real, cadena. Sin embargo esta recibiendo un tipo error
 \end{lstlisting}
+
 \end{document}
