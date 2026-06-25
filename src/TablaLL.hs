@@ -28,7 +28,7 @@ tablaLL B TkReturn = Just $ Regla ReglB_S [Accion AccBTipoRet, NoTerminal S, Acc
 tablaLL B TkWrite  = Just $ Regla ReglB_S [Accion AccBTipoRet, NoTerminal S, Accion AccDec1]
 
 tablaLL B TkLet    = Just $ Regla ReglB_Let [Accion AccZonaDecl, Terminal TkLet, NoTerminal T,
-                                         Terminal (TkIdentificador 0), Terminal TkPuntoComa, Accion AccBLet]
+                                         Terminal (TkIdentificador 0), Accion AccBLet, Terminal TkPuntoComa]
 tablaLL B TkIf     = Just $ Regla ReglB_If [Terminal TkIf, Terminal TkParentesisA, NoTerminal E, Terminal TkParentesisC, Accion AccBIf, NoTerminal Z, Accion AccDec5] 
 
 --    C 
@@ -177,13 +177,13 @@ tablaLL R1 TkComa        = Just $ Regla ReglR1_Lambda [Accion AccR1Void]
 
 --    S
 tablaLL S (TkIdentificador _) = Just $ Regla ReglS_IdG
-    [Terminal (TkIdentificador 0), NoTerminal G, Terminal TkPuntoComa, Accion AccSId]
+    [Terminal (TkIdentificador 0), NoTerminal G, Accion AccSId, Terminal TkPuntoComa]
 tablaLL S TkRead   = Just $ Regla ReglS_Read
-    [Terminal TkRead, Terminal (TkIdentificador 0), Terminal TkPuntoComa, Accion AccSRead]
+    [Terminal TkRead, Terminal (TkIdentificador 0), Accion AccSRead, Terminal TkPuntoComa]
 tablaLL S TkReturn = Just $ Regla ReglS_Return
-    [Terminal TkReturn, NoTerminal X, Terminal TkPuntoComa, Accion AccSReturn]
+    [Terminal TkReturn, NoTerminal X, Accion AccSReturn, Terminal TkPuntoComa]
 tablaLL S TkWrite  = Just $ Regla ReglS_Write
-    [Terminal TkWrite, NoTerminal E, Terminal TkPuntoComa, Accion AccSWrite]
+    [Terminal TkWrite, NoTerminal E, Accion AccSWrite, Terminal TkPuntoComa]
 
 --    T
 tablaLL T TkInt     = Just $ Regla ReglT_Int [Terminal TkInt, Accion AccTInt]

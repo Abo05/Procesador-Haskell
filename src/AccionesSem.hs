@@ -12,8 +12,10 @@ getAux aux i = infoSem (aux !! i)
 -- Modificar un elemento de la pila auxiliar por índice desde la cima
 setAux :: [SimboloSem] -> Int -> (InfoSem -> InfoSem) -> [SimboloSem]
 setAux aux i f =
-    let (antes, sim:despues) = splitAt i aux
-    in antes ++ [sim { infoSem = f (infoSem sim) }] ++ despues
+    let (antes, resto) = splitAt i aux
+    in case resto of
+        (sim:despues) -> antes ++ [sim { infoSem = f (infoSem sim) }] ++ despues
+        []            -> aux
 
 -- Liberar n símbolos de la cima de la pila auxiliar
 liberarSimbolos :: [SimboloSem] -> Int -> [SimboloSem]
@@ -135,7 +137,7 @@ aplicarAccion AccUV ge ts pila aux _ =
                     then vTipo else TipoError
         msg      = "Se están operando dos expresiones de distinto tipo, la primera expresión es del tipo "
                  ++ tipoAString vTipo ++ ", mientras que la segunda es del tipo " ++ tipoAString u1Tipo
-        ge'      = if tRes == TipoError then errorSem msg ge else ge
+        ge'      = if tRes == TipoError && vTipo /= TipoError && u1Tipo /= TipoError then errorSem msg ge else ge
         aux'     = setAux (liberarSimbolos aux 2) u (\i -> i { tipo = tRes })
     in return (ge', ts, pila, aux')
         where u1 = 0
@@ -155,7 +157,7 @@ aplicarAccion AccU1Suma ge ts pila aux _ =
           | otherwise =
               "Se está sumando dos expresiones de distinto tipo, la primera expresión es del tipo "
               ++ tipoAString vTipo ++ ", mientras que la segunda es del tipo " ++ tipoAString u1Tipo
-        ge'      = if tRes == TipoError then errorSem msg ge else ge
+        ge'      = if tRes == TipoError && vTipo /= TipoError && u1Tipo /= TipoError then errorSem msg ge else ge
         aux'     = setAux (liberarSimbolos aux 3) u1 (\i -> i { tipo = tRes })
     in return (ge', ts, pila, aux')
         where u1_1 = 0
@@ -263,7 +265,7 @@ aplicarAccion AccWId ge ts pila aux _ =
                             else TipoError
         msg    = ("Los parametros de la llamada a la función son incorrectos, se esperaba los tipos "
                    ++ mostrarParametros (maybe [] parametros idInfo))
-        ge'    = if tRes == TipoError then errorSem msg ge else ge
+        ge'    = if tRes == TipoError && idTipo /= TipoError && oTipo /= TipoError then errorSem msg ge else ge
         aux'   = setAux (liberarSimbolos aux 2) w (\i -> i { tipo = tRes })
     in return (ge', ts, pila, aux')
         where identificador = 1
@@ -330,32 +332,32 @@ aplicarAccion AccSId ge ts pila aux _ =
         paramG    = parametros gInfo
 
         ge1
-          | esLlamada && paramId /= paramG =
+          | esLlamada && paramId /= paramG && idTipo /= TipoError && gTipo /= TipoError =
               errorSem
                   ("Los parametros de la llamada a la función son incorrectos, se esperaba los tipos "
                    ++ mostrarParametros paramId) ge
-          | not esLlamada && idTipo /= gTipo =
+          | not esLlamada && idTipo /= gTipo && idTipo /= TipoError && gTipo /= TipoError =
               errorSem
                   ("Intentando asignar a una variable de tipo " ++ tipoAString idTipo
                    ++ " un valor de tipo " ++ tipoAString gTipo) ge
           | otherwise = ge
 
-        aux' = liberarSimbolos aux 3
+        aux' = liberarSimbolos aux 2
     in return (ge1, ts, pila, aux')
-        where identificador = 2
-              g = 1
+        where identificador = 1
+              g = 0
 
 -- Regla 27: AccSWrite
 aplicarAccion AccSWrite ge ts pila aux _ = 
     let eTipo = tipo (getAux aux e)
-        ge'   = if eTipo `notElem` [TipoEntero, TipoReal, TipoCadena]
+        ge'   = if eTipo `notElem` [TipoEntero, TipoReal, TipoCadena] && eTipo /= TipoError
                     then errorSem
                         ("La expresión write solo admite expresiones del tipo entero, real, cadena. Sin embargo está recibiendo un tipo "
                          ++ tipoAString eTipo) ge
                     else ge
-        aux'  = liberarSimbolos aux 3
+        aux'  = liberarSimbolos aux 2
     in return (ge', ts, pila, aux')
-        where e = 1
+        where e = 0
 
 -- Regla 28: AccSRead
 aplicarAccion AccSRead ge ts pila aux _ =
@@ -363,28 +365,28 @@ aplicarAccion AccSRead ge ts pila aux _ =
         idInfo = posId >>= \p -> getInfo p ts
         idTipo = maybe TipoError tipo idInfo
 
-        ge'    = if idTipo `notElem` [TipoEntero, TipoReal, TipoCadena]
+        ge'    = if idTipo `notElem` [TipoEntero, TipoReal, TipoCadena] && idTipo /= TipoError
                     then errorSem
                         ("La expresión read guarda valores del tipo entero, real, cadena. Sin embargo está intentando guardar en una variable de tipo "
                          ++ tipoAString idTipo) ge
                     else ge
-        aux'   = liberarSimbolos aux 3
+        aux'   = liberarSimbolos aux 2
     in return (ge', ts, pila, aux')
-        where identificador = 1
+        where identificador = 0
         
 -- Regla 29: AccSReturn
 aplicarAccion AccSReturn ge ts pila aux _ =
     let xTipo    = tipo (getAux aux x)
         tipoRetS = tipoRet (getAux aux s)
-        ge'      = if xTipo /= tipoRetS
+        ge'      = if xTipo /= tipoRetS && xTipo /= TipoError
                     then errorSem
                         ("Tipo devuelto incorrecto, se esperaba devolver un tipo "
                          ++ tipoAString tipoRetS ++ " pero se devuelve un tipo " ++ tipoAString xTipo) ge
                     else ge
-        aux'     = liberarSimbolos aux 3
+        aux'     = liberarSimbolos aux 2
     in return (ge', ts, pila, aux')
-        where x = 1
-              s = 3
+        where x = 0
+              s = 2
 
 -- Relga 30: AccGAsig
 aplicarAccion AccGAsig ge ts pila aux _ =
@@ -458,7 +460,7 @@ aplicarAccion AccBIf ge ts pila aux _ =
         tipoRetB = tipoRet (getAux aux b)
         msg   = "La expresión dentro del if debe ser de tipo lógico, sin embargo está evaluando una expresión de tipo "
               ++ tipoAString eTipo
-        ge'   = if eTipo /= TipoLogico then errorSem msg ge else ge
+        ge'   = if eTipo /= TipoLogico && eTipo /= TipoError then errorSem msg ge else ge
         pila' = case pila of
                     []     -> pila
                     (z:ss) -> z { infoSem = (infoSem z) { tipoRet = tipoRetB } } : ss
@@ -559,10 +561,10 @@ aplicarAccion AccBLet ge ts pila aux _ =
                     Just pos -> asignarTipoYDespl pos tTipo ts
                     Nothing  -> ts
         ts2   = ts1 { zonaDecl = False }
-        aux'  = liberarSimbolos aux 4
+        aux'  = liberarSimbolos aux 3
     in return (ge, ts2, pila, aux')
-        where identificador = 1
-              t = 2
+        where identificador = 0
+              t = 1
 
 -- Regla 53: AccBTipoRet
 aplicarAccion AccBTipoRet ge ts pila aux _ =
