@@ -1,10 +1,13 @@
+% !TeX program = xelatex
 % !TeX root = memoria.tex
+
 \documentclass{article}
 
 \usepackage[spanish]{babel}
 
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
+\usepackage{fontspec}
+
+\setmonofont{DejaVu Sans Mono}[Scale=MatchLowercase]
 
 \usepackage{graphicx}
 
@@ -24,6 +27,9 @@
 
 \usepackage{listings}
 \usepackage{xcolor}
+
+\usepackage{multicol}
+\usepackage{verbatim}
 
 % Definición de colores
 \definecolor{codegreen}{rgb}{0,0.6,0}
@@ -770,11 +776,10 @@ Descendente
 \end{lstlisting}
 
 \textbf{Árbol de Análisis Sintáctico:}
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.8\textwidth]{./arbol_vast_1.png} 
-    \caption{Árbol de derivación generado con VASt para el fichero 1.}
-\end{figure}
+\begin{multicols}{2}
+    \tiny
+    \verbatiminput{arbol_latex1.txt}
+\end{multicols}
 
 \subsubsection{Fichero Correcto 2}
 \begin{lstlisting}[title={fichero2.txt}]
@@ -909,11 +914,10 @@ Descendente
 \end{lstlisting}
 
 \textbf{Árbol de Análisis Sintáctico:}
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.8\textwidth]{./arbol_vast_2.png} 
-    \caption{Árbol de derivación generado con VASt para el fichero 2.}
-\end{figure}
+\begin{multicols}{2}
+    \tiny
+    \verbatiminput{arbol_latex2.txt}
+\end{multicols}
 
 \subsubsection{Fichero Correcto 3}
 \begin{lstlisting}[title={fichero3.txt}]
@@ -991,11 +995,10 @@ Descendente
 \end{lstlisting}
 
 \textbf{Árbol de Análisis Sintáctico:}
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.8\textwidth]{./arbol_vast_3.png} 
-    \caption{Árbol de derivación generado con VASt para el fichero 3.}
-\end{figure}
+\begin{multicols}{2}
+    \tiny
+    \verbatiminput{arbol_latex3.txt}
+\end{multicols}
 
 \subsubsection{Fichero Correcto 4}
 \begin{lstlisting}[title={fichero4.txt}]
@@ -1114,11 +1117,10 @@ Descendente
 \end{lstlisting}
 
 \textbf{Árbol de Análisis Sintáctico:}
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.8\textwidth]{./arbol_vast_4.png} 
-    \caption{Árbol de derivación generado con VASt para el fichero 4.}
-\end{figure}
+\begin{multicols}{2}
+    \tiny
+    \verbatiminput{arbol_latex4.txt}
+\end{multicols}
 
 \subsubsection{Fichero Correcto 5}
 \begin{lstlisting}[title={fichero5.txt}]
@@ -1209,11 +1211,10 @@ Descendente
 \end{lstlisting}
 
 \textbf{Árbol de Análisis Sintáctico:}
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.8\textwidth]{./arbol_vast_5.png} 
-    \caption{Árbol de derivación generado con VASt para el fichero 5.}
-\end{figure}
+\begin{multicols}{2}
+    \tiny
+    \verbatiminput{arbol_latex5.txt}
+\end{multicols}
 
 
 \subsection{Ficheros con errores}

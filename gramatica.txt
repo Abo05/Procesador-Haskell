@@ -1,4 +1,4 @@
-Terminales = { id entero real cadena true false let int float boolean string void if else function read write return && > >= + - ! -- = ; , ( { } ) eof lambda }
+Terminales = { id entero real cadena true false let int float boolean string void if else function read write return && > >= + - ! -- = ; , ( { } ) eof }
 NoTerminales = { A B C D E E1 F G H I K L O P PP Q R R1 S T U U1 V W X Z }
 Axioma = PP
 Producciones = {
