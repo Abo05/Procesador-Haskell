@@ -120,6 +120,7 @@ estadoIdent (c:cs) ge ts lexem
     | isAlphaNum c || c == '_' = estadoIdent cs ge ts (lexem ++ [c])
     | otherwise                = resolverIdent (c:cs) ge ts lexem
 
+resolverIdent :: String -> GError -> TablaSimbolos -> String -> Resultado
 resolverIdent resto ge ts lexem =
     case identificadorACode lexem of
         -- Palabra reservada: no toca la TS
