@@ -120,21 +120,13 @@ estadoIdent (c:cs) ge ts lexem
     | isAlphaNum c || c == '_' = estadoIdent cs ge ts (lexem ++ [c])
     | otherwise                = resolverIdent (c:cs) ge ts lexem
 
-resolverIdent :: String -> GError -> TablaSimbolos -> String -> Resultado
 resolverIdent resto ge ts lexem =
     case identificadorACode lexem of
-        Just tk ->
-            -- Palabra reservada: no toca la TS
-            (Just tk, resto, ge, ts)
+        -- Palabra reservada: no toca la TS
+        Just tk -> (Just tk, resto, ge, ts)
         Nothing ->
-            -- Identificador: insertar o buscar
-            case insertarOBuscar lexem ts of
-                (Nothing, ts') ->
-                    -- Identificador no declarado fuera de zona de declaración
-                    let ge' = registrarError ErrIdNoDecl ge
-                    in (Nothing, resto, ge', ts')
-                (Just pos, ts') ->
-                    (Just (TkIdentificador pos), resto, ge, ts')
+            let (pos, ts') = insertarOBuscar lexem ts
+            in (Just (TkIdentificador pos), resto, ge, ts')
 
 ------------------------------------------------------
 

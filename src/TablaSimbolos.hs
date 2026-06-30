@@ -42,31 +42,42 @@ liberarTablaLocal ts = ts { tablaLocal = Nothing, desplazamientoLocal = 0 }
 -- Devuelve (posición, tabla actualizada, fue insertado)
 -- Posiciones positivas: tabla global
 -- Posiciones negativas: tabla local (convenio del enunciado)
--- Ahora la posición puede no existir: Maybe Int
-insertarOBuscar :: String -> TablaSimbolos -> (Maybe Int, TablaSimbolos)
+insertarOBuscar :: String -> TablaSimbolos -> (Int, TablaSimbolos)
 insertarOBuscar lexem ts =
     case tablaLocal ts of
         Nothing ->
             case buscar lexem (tablaGlobal ts) of
-                Just pos -> (Just pos, ts)
-                Nothing
-                    | zonaDecl ts ->
-                        let (pos, tg') = insertarEnTabla lexem (tablaGlobal ts)
-                        in (Just pos, ts { tablaGlobal = tg' })
-                    | otherwise -> (Nothing, ts)  -- error: identificador no declarado fuera de zona de declaración
+                Just pos -> (pos, ts)
+                Nothing  ->
+                    -- No existe: si estamos declarando, tipo lo decidirá luego AccBLet;
+                    -- si no, se declara implícitamente como entero global aquí mismo
+                    let (pos, tg') = insertarEnTabla lexem (tablaGlobal ts)
+                        ts'        = ts { tablaGlobal = tg' }
+                        ts''       = if zonaDecl ts
+                                        then ts'  -- en declaración explícita, el tipo lo pondrá AccBLet
+                                        else asignarTipoYDespl pos TipoEntero ts'  -- implícita: entero
+                    in (pos, ts'')
 
         Just tl ->
             case buscar lexem tl of
-                Just pos -> (Just (negate (pos+1)), ts)
+                Just pos -> (negate (pos + 1), ts)
                 Nothing  ->
                     case buscar lexem (tablaGlobal ts) of
-                        Just pos -> (Just pos, ts)
-                        Nothing
-                            | zonaDecl ts ->
-                                let (pos, tl') = insertarEnTabla lexem tl
-                                -- Se suma uno la posición, pues la tabla local empieza en -1
-                                in (Just (negate (pos+1)), ts { tablaLocal = Just tl' })
-                            | otherwise -> (Nothing, ts)
+                        Just pos -> (pos, ts)
+                        Nothing  ->
+                            -- No existe ni en local ni en global
+                            if zonaDecl ts
+                                then
+                                    -- Declaración explícita local
+                                    let (pos, tl') = insertarEnTabla lexem tl
+                                    in (negate (pos + 1), ts { tablaLocal = Just tl' })
+                                else
+                                    -- Uso implícito dentro de función: según el enunciado,
+                                    -- "se considera variable GLOBAL entera", no local
+                                    let (pos, tg') = insertarEnTabla lexem (tablaGlobal ts)
+                                        ts'        = ts { tablaGlobal = tg' }
+                                        ts''       = asignarTipoYDespl pos TipoEntero ts'
+                                    in (pos, ts'')
 
 insertarEnTabla :: String -> Tabla -> (Int, Tabla)
 insertarEnTabla lexem (Tabla lista) =
